@@ -1,0 +1,17 @@
+{
+	"name": "Super Cool API",
+	"baseUrl": "http://app.com/api",
+	"version": "v1.0",
+	"contexts": {
+		"public": [],
+		"logged": ["Check::is_logged"],
+		"owns": ["Check::is_logged", "Check::owns", "is_admin"]
+	},
+	"traits": {
+		"paged": "???"
+	},
+	"resources": {
+		"Patient": "include spec/patient.json",
+		"Doctor": "include spec/doctor.json"
+	}
+}

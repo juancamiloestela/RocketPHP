@@ -1,0 +1,94 @@
+{
+	"description": "A patient endpoint",
+	"properties": {
+		"name": {
+			"type": "string",
+			"max_length": 30,
+			"min_length": 1
+		},
+		"email": {
+			"type": "string",
+			"max_length": 30,
+			"min_length": 1,
+			"unique": true,
+			"matches": "/[a-z]+@[a-z]+/"
+		},
+		"password": {
+			"type": "string",
+			"max_length": 60,
+			"min_length": 60
+		},
+		"phone": {
+			"type": "string",
+			"max_length": 10,
+			"min_length": 10,
+			"required": false,
+			"matches": "/[0-9]+/",
+			"default": "123-4567",
+			"example": "123-4567",
+			"description": "Patients phone number"
+		},
+		"age": {
+			"type": "numeric",
+			"max": 99,
+			"min": 0
+		},
+		"motorcycle": {
+			"type": {
+				"relation": "one-to-one",
+				"resource": "Motorcycle",
+				"on_delete": "cascade"
+			}
+		},
+		"cars": {
+			"type": {
+				"relation": "one-to-many",
+				"resource": "Car",
+				"on_delete": "cascade"
+			},
+			"required": false,
+			"max": 3
+		}
+	},
+	"endpoints": {
+		"/patients": {
+			"public":{
+				"GET": {
+					"queryParams": {
+						"page": {
+							"type": "int",
+							"description": "",
+							"required": false,
+							"example": 2
+						}
+					},
+					"returns": [{"name":"", "email":""}]
+				}
+			},
+			"logged": {
+				"GET": {
+					"expects": ["name", "email", "phone"],
+					"accepts": ["age"],
+					"returns": {"id":"", "name":"", "email":"", "phone":""}
+				}
+			},
+			"owns": {
+				"GET": {
+					"before": "",
+					"returns": [{"name":"", "email":"", "phone":""}],
+					"after": ""
+				}
+			}
+		},
+		"/patients/{id}/path/{code}": {
+			"owns": {
+				"GET": {
+					"where": ["id", "==", "id"],
+					"sql": "",
+					"action": "",
+					"returns": {"name":"", "email":""}
+				}
+			}
+		}
+	}
+}

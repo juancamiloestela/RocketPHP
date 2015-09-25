@@ -1,0 +1,20 @@
+{
+	"description": "A patient endpoint",
+	"properties": {
+		"name": {
+			"type": "string",
+			"max_length": 30,
+			"min_length": 1,
+			"required": true
+		}
+	},
+	"endpoints": {
+		"/doctor": {
+			"public":{
+				"GET": {
+					"returns": [{"name":""}]
+				}
+			}
+		}
+	}
+}
