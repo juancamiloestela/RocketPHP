@@ -7,12 +7,12 @@
  * - debugging global to control if exceptions are propagated or not
  * - build hooks/delegates logic
  * - generator script
- * - documentator script
  * - sync db
  * - cleanup config/folder structure/composer project
  * - datatypes: date, numbers, float, int, relations
  * - traits paged, etc
  * - exposed
+ * - documentator script
  *
  * Roadmap
  * - yaml
@@ -21,7 +21,18 @@
  * - CSRF
  */
 
+if (!defined('APP_PATH')){
+	define('APP_PATH', __DIR__);
+}
 
+if (!defined('APP_ROOT')){
+	//define('APP_ROOT', str_replace($_SERVER['DOCUMENT_ROOT'], '', getcwd()));
+}
+
+define('PUBLIC_PATH', getcwd());
+chdir(APP_PATH);
+
+/*
 // test for httpS
 $protocol = 'http';
 if (isset($_SERVER['SERVER_PROTOCOL'])){
@@ -45,14 +56,15 @@ $host = $protocol . $name . $port;
 define('APP_URL', $host . APP_ROOT);
 
 $uri = explode('?', $_SERVER['REQUEST_URI'])[0];
-define('CURRENT_URL', str_replace(APP_ROOT, $uri, APP_URL));
+define('CURRENT_URL', str_replace(APP_ROOT, $uri, APP_URL));*/
 
 
-include 'rocket/src/Rocket.php';
-include 'database/src/System.php';
-include 'mail/src/System.php';
-include 'error/src/System.php';
-include 'translator/src/System.php';
+include 'rocket/rocket/src/Rocket.php';
+include 'rocket/database/src/System.php';
+include 'rocket/mail/src/System.php';
+include 'rocket/error/src/System.php';
+include 'rocket/translator/src/System.php';
+include 'rocket/api/src/System.php';
 
 	//error_reporting(E_ALL);
 
@@ -69,17 +81,63 @@ include 'translator/src/System.php';
 	// CSRF
 	// translation
 
+
+class Delegates{
+
+	static function receiveName(&$value, &$errors){
+		echo __METHOD__ . PHP_EOL;
+		echo "value: " . PHP_EOL; print_r($value); echo PHP_EOL;
+		echo "errors: " . PHP_EOL; print_r($errors);
+		echo PHP_EOL . PHP_EOL;
+		$value = $value . '_name';
+		return $value;
+	}
+
+	static function publicPatientsError(&$data, &$errors, $mail){
+		echo __METHOD__ . PHP_EOL;
+		echo "data: " . PHP_EOL; print_r($data);
+		echo "errors: " . PHP_EOL; print_r($errors);
+		echo "mail: " . PHP_EOL; print_r($mail);
+		echo PHP_EOL . PHP_EOL;
+		$errors[] = 'injected error';
+		return true; // enables/disables exception
+	}
+	static function publicPatientsInput(&$data, $mail){
+		echo __METHOD__ . PHP_EOL;
+		echo "data: " . PHP_EOL; print_r($data);
+		echo "mail: " . PHP_EOL; print_r($mail);
+		echo PHP_EOL . PHP_EOL;
+	}
+	static function publicPatientsQuery($data, $queryData, $query){
+		echo __METHOD__ . PHP_EOL;
+		echo "data: " . PHP_EOL; print_r($data);
+		echo "queryData: " . PHP_EOL; print_r($queryData);
+		echo "query: " . PHP_EOL; print_r($query);
+		echo PHP_EOL . PHP_EOL;
+	}
+	static function publicPatientsData($data){
+		echo __METHOD__ . PHP_EOL;
+		echo "data: " . PHP_EOL; print_r($data);
+		echo PHP_EOL . PHP_EOL;
+	}
+}
+
 $request = Rocket::set('request', new \Rocket\Request($config['request']));
 $response = Rocket::set('response', new \Rocket\Response($config['response']));
 $database = Rocket::set('database', new \Rocket\Database\System($config['database']));
 $mail = Rocket::set('mail', new \Rocket\Mail\System($config['mail']));
 $error = Rocket::set('error', new \Rocket\Error\System($config['error']));
 $translator = Rocket::set('translator', new \Rocket\Translator\System($request, $config['translator']));
-Rocket::launch($database, $config['rocket']);
+$api = Rocket::set('api', new \Rocket\Api\System($database, $config['api']));
+
+
+$api->launch();//$database, $config['rocket']);
+
+
 
 $data = array();
 try{
-	$data['data'] = Rocket::handle($request->uri(), $request->method(), $request->data());
+	$data['data'] = $api->handle($request->uri(), $request->method(), $request->data());
 	$data['code'] = 200;
 }catch (NotFoundException $e){
 	$data['code'] = 404;
@@ -104,8 +162,12 @@ try{
 }
 
 if (isset($data['errors'])){
-	foreach ($data['errors'] as $key => $value){
-		$data['errors'][$key] = $translator->translate($value);
+	if (is_array($data['errors'])){
+		foreach ($data['errors'] as $key => $value){
+			$data['errors'][$key] = $translator->translate($value);
+		}
+	}else{
+		$data['errors'] = $translator->translate($data['errors']);
 	}
 }
 

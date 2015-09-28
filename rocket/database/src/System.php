@@ -122,7 +122,7 @@ class System
 			$this->tables = array();
 			$result = $this->query('SHOW tables');
 
-			foreach ($result->data() as $table){
+			foreach ($result as $table){
 				$t = current($table);
 				$this->tables[] = $t;
 			}
@@ -136,7 +136,7 @@ class System
 			$this->indexes[$table] = array();
 			$result = $this->query('SHOW INDEX FROM `'.$table.'`');
 
-			foreach ($result->data() as $index){
+			foreach ($result as $index){
 				if (!array_key_exists($index['Column_name'], $this->indexes[$table])){
 					$this->indexes[$table][$index['Column_name']] = array();
 				}
@@ -313,14 +313,15 @@ class System
 		$sql = 'ALTER TABLE `'. $field['Table'] . '` ADD `' . $field['Field'] . '` ' . $field['Type'];
 		$sql .= ($field['Null'] == 'NO') ? ' NOT NULL' : ' NULL';
 		
-		$sql .= ' DEFAULT ';
 		if (is_numeric($field['Default'])){
-			$sql .= $field['Default'];
-		}else if (is_null($field['Default'])){
-			$sql .= 'NULL';
-		}else{
-			$sql .= "'" . $field['Default'] . "'";
+			$sql .= ' DEFAULT ' . $field['Default'];
+		}else if (is_null($field['Default']) && $field['Null'] == 'YES'){
+			$sql .= ' DEFAULT NULL';
+		}else if (!is_null($field['Default'])){
+			$sql .= " DEFAULT '" . $field['Default'] . "'";
 		}
+
+echo $sql . PHP_EOL;
 		$this->dbh->exec($sql);
 	}
 
@@ -335,13 +336,12 @@ class System
 		$sql = 'ALTER TABLE `'. $field['Table'] . '` MODIFY `' . $field['Field'] . '` ' . $field['Type'];
 		$sql .= ($field['Null'] == 'NO') ? ' NOT NULL' : ' NULL';
 
-		$sql .= ' DEFAULT ';
 		if (is_numeric($field['Default'])){
-			$sql .= $field['Default'];
-		}else if (is_null($field['Default'])){
-			$sql .= 'NULL';
-		}else{
-			$sql .= "'" . $field['Default'] . "'";
+			$sql .= ' DEFAULT ' . $field['Default'];
+		}else if (is_null($field['Default']) && $field['Null'] == 'YES'){
+			$sql .= ' DEFAULT NULL';
+		}else if (!is_null($field['Default'])){
+			$sql .= " DEFAULT '" . $field['Default'] . "'";
 		}
 
 
@@ -368,6 +368,7 @@ class System
 				$sql .= '; ALTER TABLE `'. $field['Table'] . '` DROP INDEX ' . $field['Field'];
 			}
 		}
+echo $sql . PHP_EOL;
 		$this->dbh->exec($sql);
 	}
 

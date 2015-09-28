@@ -113,6 +113,8 @@ class Request {
 	 */
 	private $port;
 
+	private $lang;
+
 	/**
 	 * Current request data
 	 * All GET, POST and PUT data are merged
@@ -123,14 +125,13 @@ class Request {
 	private $data;
 
 
-	private $publicUrl = '';
-
 	public $config = array();
 	protected $defaults = array(
-		'allowed_formats' => 'html|json',
-		'default_format' => 'html',
-		'app_path' => '', // path to app root folder in filesystem
-		'app_root' => '' // path from server root to app root
+		//'allowed_formats' => 'html|json',
+		//'default_format' => 'html',
+		//'app_path' => '', // path to app root folder in filesystem
+		'app_root' => '', // path from server root to app root
+		'default_lang' => 'en_US'
 	);
 
 
@@ -141,14 +142,11 @@ class Request {
 	function __construct($config = array()){
 		$this->config = array_merge($this->defaults, $config);
 
-		// keep original publicly called url
-		$this->publicUrl = $this->url();
-		// reset all vars so that lazy mechanism will trigger again
-		$this->url = null;
-		$this->uri = null;
-		$this->format = null;
-		$this->rootUrl = null;
-		$this->queryString = null;
+		//$this->setLang($_SERVER['HTTP_ACCEPT_LANGUAGE']);
+		//if ($_GET['lang']){
+		//	override
+		//}
+		// TODO: implement q based language detection
 	}
 
 	function setAppPaths($appPath, $publicPath)
@@ -190,14 +188,6 @@ class Request {
 		return $this->url;
 	}
 
-	function publicUrl($withQueryString = true)
-	{
-		if (!$withQueryString){
-			$url = explode('?', $this->publicUrl);
-			return $url[0];
-		}
-		return $this->publicUrl;
-	}
 
 	/**
 	 * Set current root url
@@ -226,13 +216,13 @@ class Request {
 	function setUri($uri){
 		$uri = explode('?', $uri);
 		$uri = $uri[0];
-		if (preg_match('/\.(.'.$this->config['allowed_formats'].')$/', $uri, $matches)){
+		// remove allowed formats stuff
+		/*if (preg_match('/\.(.'.$this->config['allowed_formats'].')$/', $uri, $matches)){
 			$this->format = $matches[1];
 			$uri = str_replace($matches[0], '', $uri);
-		}
-		$this->uri = trim(str_replace($this->config['app_root'], '', $uri), ' /');
-
-
+		}*/
+		$app_root = str_replace($_SERVER['DOCUMENT_ROOT'], '', PUBLIC_PATH);
+		$this->uri = '/' . trim(str_replace($app_root, '', $uri), ' /');
 
 		/*$uri = explode('?', $uri);
 		if (isset($uri[1])){
@@ -381,9 +371,17 @@ class Request {
 		return $this->port;
 	}
 
+	function setLang($lang)
+	{
+		$this->lang = $lang;
+	}
+
 	function lang(){
-		return 'en_US';
-		// TODO: implement this
+		if ($this->lang === null){
+			//'en_US'
+			$this->setLang($this->config['default_lang']);
+		}
+		return $this->lang;
 	}
 
 	/**

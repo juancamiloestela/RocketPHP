@@ -1,0 +1,26 @@
+{
+	"description": "A motorcycle endpoint",
+	"properties": {
+		"brand": {
+			"type": "string",
+			"max_length": 30,
+			"min_length": 1
+		},
+		"owner": {
+			"type": {
+				"relation": "has-one",
+				"resource": "Patient",
+				"on": "motorcycle"
+			}
+		}
+	},
+	"endpoints": {
+		"/motorcycles": {
+			"public":{
+				"GET": {
+					"returns": [{"brand":""}]
+				}
+			}
+		}
+	}
+}

@@ -11,7 +11,10 @@
 		"paged": "???"
 	},
 	"resources": {
-		"Patient": "include spec/patient.json",
-		"Doctor": "include spec/doctor.json"
+		"Patient": "include patient.json",
+		"Doctor": "include doctor.json",
+		"Car": "include car.json",
+		"Motorcycle": "include motorcycle.json",
+		"Job": "include job.json"
 	}
 }

@@ -4,7 +4,8 @@
 		"name": {
 			"type": "string",
 			"max_length": 30,
-			"min_length": 1
+			"min_length": 1,
+			"on_receive": "Delegates.receiveName"
 		},
 		"email": {
 			"type": "string",
@@ -29,25 +30,33 @@
 			"description": "Patients phone number"
 		},
 		"age": {
-			"type": "numeric",
+			"type": "int",
 			"max": 99,
 			"min": 0
 		},
 		"motorcycle": {
 			"type": {
-				"relation": "one-to-one",
+				"relation": "has-one",
 				"resource": "Motorcycle",
-				"on_delete": "cascade"
+				"on": "owner"
 			}
 		},
 		"cars": {
 			"type": {
-				"relation": "one-to-many",
+				"relation": "has-many",
 				"resource": "Car",
+				"on": "owner",
 				"on_delete": "cascade"
 			},
 			"required": false,
 			"max": 3
+		},
+		"jobs": {
+			"type": {
+				"relation": "has-many",
+				"resource": "Job",
+				"on": "employees"
+			}
 		}
 	},
 	"endpoints": {
@@ -62,6 +71,11 @@
 							"example": 2
 						}
 					},
+					"expects": ["name"],
+					"on_error": "Delegates.publicPatientsError",
+					"on_input": "Delegates.publicPatientsInput",
+					"on_query": "Delegates.publicPatientsQuery",
+					"on_data": "Delegates.publicPatientsData",
 					"returns": [{"name":"", "email":""}]
 				}
 			},

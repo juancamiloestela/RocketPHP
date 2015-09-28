@@ -7,7 +7,6 @@ class Doctor {
 	}
 	function receive_name($value, &$errors) {
 		$errors = array_merge($errors, $this->validate_name($value));
-		// TODO: $value = customHook($value);
 		return $value;
 	}
 
@@ -21,17 +20,17 @@ class Doctor {
 
 	function GET_doctor_when_public() {
 		$data = array();
-
 		$errors = array();
 
 		if (count($errors) > 0) {
 			throw new InvalidInputDataException($errors);
-		} else {
-			// TODO: $data = customHook($data);
-			$statement = $this->db->prepare("select * from some_table;");
-			$statement->execute();
-			$data = $statement->fetchAll(PDO::FETCH_ASSOC);
 		}
+		// TODO: $data = customHook($data);
+		$query = "select * from Doctor";
+		$queryData = array();
+		$statement = $this->db->prepare($query);
+		$statement->execute($queryData);
+		$data = $statement->fetchAll(PDO::FETCH_ASSOC);
 		return $data;
 	}
 

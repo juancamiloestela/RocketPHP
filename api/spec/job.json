@@ -1,0 +1,26 @@
+{
+	"description": "A job endpoint",
+	"properties": {
+		"role": {
+			"type": "string",
+			"max_length": 30,
+			"min_length": 1
+		},
+		"employees": {
+			"type": {
+				"relation": "has-many",
+				"resource": "Patient",
+				"on": "jobs"
+			}
+		}
+	},
+	"endpoints": {
+		"/cars": {
+			"public":{
+				"GET": {
+					"returns": [{"brand":""}]
+				}
+			}
+		}
+	}
+}

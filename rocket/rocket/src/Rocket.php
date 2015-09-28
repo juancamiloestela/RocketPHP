@@ -15,7 +15,7 @@ class Rocket{
 
 	public static $config = array();
 	protected static $defaults = array(
-		'context_index_file' => 'api/resources/contexts.php',
+		'context_index_file' => 'api/resources/contexts.php', // TODO: pull these from systems
 		'routes_file' => 'api/resources/routes.php',
 		'contexts_file' => 'api/contexts/contexts.php',
 		'delegates_file' => 'api/delegates/delegates.php',
@@ -51,9 +51,18 @@ class Rocket{
 		throw new \Exception('Could not find instance of '.$id);
 	}
 
-	public static function call(){
-		$args = func_get_args();
-		$callable = array_shift($args);
+	public static function call($callable, &$p0 = null, &$p1 = null, &$p2 = null, &$p3 = null, &$p4 = null, &$p5 = null, &$p6 = null){
+		// ugly hack to make variable number of args by reference
+		$args = array();
+		for ($i = 0; $i < 7; $i++){
+			$name = 'p'.$i;
+			if ($$name !== null){
+				$args[] = &$$name;
+			}
+		}
+
+		//$args = func_get_args();
+		//$callable = array_shift($args);
 
 		if (is_array($callable)){
 			$r = new \ReflectionMethod($callable[0], $callable[1]);
