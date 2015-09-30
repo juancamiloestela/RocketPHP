@@ -98,6 +98,7 @@ class System
 				$this->dbh->exec("SET time_zone='".$this->config['timezone']."';");
 			}
 			$this->dbh->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
+			$this->dbh->setAttribute(\PDO::ATTR_EMULATE_PREPARES, FALSE);
 		/*}catch (\PDOException $e){
 			die('Could not connect');
 		}*/
@@ -206,7 +207,7 @@ class System
 			$this->connect();
 		}
 
-		if (is_numeric($value[0])){
+		if (count($value) && is_numeric($value[0])){
 			$instance = new Query($this);
 			$instance->select()->from($name)->where('id')->is($value[0]);
 			return $instance;

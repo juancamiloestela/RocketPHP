@@ -21,6 +21,9 @@
  * - CSRF
  */
 
+
+define('DEVELOPING', true);
+
 if (!defined('APP_PATH')){
 	define('APP_PATH', __DIR__);
 }
@@ -108,17 +111,64 @@ class Delegates{
 		echo "mail: " . PHP_EOL; print_r($mail);
 		echo PHP_EOL . PHP_EOL;
 	}
-	static function publicPatientsQuery($data, $queryData, $query){
+	static function publicPatientsQuery($query, $data){
 		echo __METHOD__ . PHP_EOL;
 		echo "data: " . PHP_EOL; print_r($data);
-		echo "queryData: " . PHP_EOL; print_r($queryData);
 		echo "query: " . PHP_EOL; print_r($query);
 		echo PHP_EOL . PHP_EOL;
 	}
-	static function publicPatientsData($data){
+	static function publicPatientsData($data, $mail){
 		echo __METHOD__ . PHP_EOL;
 		echo "data: " . PHP_EOL; print_r($data);
 		echo PHP_EOL . PHP_EOL;
+		print_r($mail);
+	}
+}
+
+class Contexts{
+
+	static function is_logged($mail){
+		return true;
+	}
+
+	static function is_owner(){
+		return false;
+	}
+
+	static function is_admin(){
+		return false;
+	}
+}
+
+
+class Paginated{
+
+	static function on_input(&$data, $mail){
+		// ensure values are set
+		$data['offset'] = isset($data['offset']) ? $data['offset'] : 0;
+		$data['length'] = isset($data['length']) ? $data['length'] : 10;
+	}
+
+	static function on_query(&$query, $data){
+		// modify query
+		$query = str_replace('SELECT ', 'SELECT SQL_CALC_FOUND_ROWS ', $query) . " LIMIT :offset, :length";
+	}
+
+	static function on_data($data, $database, $response){
+		// get total records and push them to response metadata
+		$statement = $database->prepare("SELECT FOUND_ROWS();");
+		$statement->execute();
+		$total = $statement->fetch();
+		$response->setMetadata('total', $total[0]);
+	}
+}
+
+class Secure{
+	static function on_input(&$data){
+		if (true){
+			//$data['authorized'] = false;
+			//throw new \UnauthorizedException();
+		}
 	}
 }
 
@@ -151,6 +201,7 @@ try{
 }catch (PDOException $e){
 	$data['code'] = 500;
 	$data['errors'] = "database.error";
+	print_r($e->getMessage());
 }catch (Exception $e){
 	if (true){ // debugging
 		// let the error system handle it
@@ -160,6 +211,9 @@ try{
 		$data['errors'] = "Whoops... Something ugly happened";
 	}
 }
+
+
+
 
 if (isset($data['errors'])){
 	if (is_array($data['errors'])){
@@ -174,6 +228,7 @@ if (isset($data['errors'])){
 // -------
 
 $response->status($data['code']);
+$data = array_merge($data, $response->getMetadata());
 $response->header('Content-Type', 'application/json');
 $response->body(json_encode($data));
 $response->send();

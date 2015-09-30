@@ -1,4 +1,4 @@
 <?php 
 
-$config = include '../api/config.php';
+$config = include '../config.php';
 include '../launch.php';

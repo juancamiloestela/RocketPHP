@@ -63,14 +63,6 @@
 		"/patients": {
 			"public":{
 				"GET": {
-					"queryParams": {
-						"page": {
-							"type": "int",
-							"description": "",
-							"required": false,
-							"example": 2
-						}
-					},
 					"expects": ["name"],
 					"on_error": "Delegates.publicPatientsError",
 					"on_input": "Delegates.publicPatientsInput",

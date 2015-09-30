@@ -4,17 +4,54 @@
 	"version": "v1.0",
 	"contexts": {
 		"public": [],
-		"logged": ["Check::is_logged"],
-		"owns": ["Check::is_logged", "Check::owns", "is_admin"]
+		"logged": ["Contexts::is_logged"],
+		"owns": ["Contexts::is_logged", "Contexts::is_owner", "Contexts::is_admin"]
 	},
 	"traits": {
-		"paged": "???"
+		"paginated": {
+			"description": "description of trait"
+		}
 	},
 	"resources": {
-		"Patient": "include patient.json",
-		"Doctor": "include doctor.json",
-		"Car": "include car.json",
-		"Motorcycle": "include motorcycle.json",
-		"Job": "include job.json"
+		"User": {
+			"description": "User entity",
+			"properties": {
+				"name": {
+					"type": "string",
+					"max_length": 30,
+					"min_length": 3
+				},
+				"email": {
+					"type": "email",
+					"max_length": 30,
+					"min_length": 5,
+					"unique": true
+				},
+				"password": {
+					"type": "string",
+					"max_length": 60,
+					"min_length": 60
+				}
+			},
+			"endpoints":{
+				"/users": {
+					"logged": {
+						"GET": {
+							"traits": ["paginated"],
+							"returns": [{"id":"", "name":"", "email":""}]
+						}
+					}
+				},
+				"/users/{id}": {
+					"logged": {
+						"GET": {
+							"returns": {"id":"", "name":""}
+						}
+					}
+				}
+			}
+		}
+
+
 	}
 }

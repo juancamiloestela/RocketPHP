@@ -1,6 +1,24 @@
 <?php
 namespace Rocket\Api;
 
+/**
+ * HEADS UP!
+ * This file will give you nightmares, but it works!
+ * A major refactor is underway.
+ *
+ * 
+ */
+
+function is_date($date, $format = 'Y-m-d H:i:s')
+{
+	$d = \DateTime::createFromFormat($format, $date);
+	return $d && $d->format($format) == $date;
+}
+
+
+
+
+
 class System
 {
 	protected $db;
@@ -23,7 +41,6 @@ class System
 		$this->config = array_merge($this->defaults, $config);
 		$this->db = $db;
 
-		echo '<pre>';
 		$this->checkFolderStructure();
 
 		$this->loadSpecs();
@@ -69,20 +86,20 @@ class System
 
 				if (!is_callable($check)){
 					if (is_array($check)){
-						//throw new Exception('Context check static method "' . $check[0] . '::' . $check[1] . '()" does not exist');
+						throw new \Exception('Context check static method "' . $check[0] . '::' . $check[1] . '()" does not exist');
 					}else{
-						//throw new Exception('Context check function "' . $check . '()" does not exist');
+						throw new \Exception('Context check function "' . $check . '()" does not exist');
 					}
 				}
 
 				//$this->runtimeContexts[$contextName][$i][2] = call_user_func_array($check, array());
+				$this->runtimeContexts[$contextName][$i][2] = \Rocket::call($check);
 			}
 		}
 	}
 
 	public function getCurrentContext()
 	{
-		return 'public';
 		foreach ($this->runtimeContexts as $contextName => $context){
 			foreach ($context as $i => $check){
 				if ( !$this->runtimeContexts[$contextName][$i][2] ){
@@ -102,9 +119,11 @@ class System
 		$uri = explode('?', $uri)[0];*/
 
 		foreach ($this->runtimeRoutes as $route => $controller){
-			echo $uri . ' ' . $route . PHP_EOL;
+			//echo $uri . ' ' . $route . PHP_EOL;
 			if (preg_match('/^'.$route.'$/', $uri, $matches)){
-				$args = array();
+				$args = array(
+					'input' => $data
+				);
 				foreach ($controller['args'] as $arg){
 					$args[] = isset($matches[$arg]) ? $matches[$arg] : null;
 				}
@@ -148,7 +167,7 @@ class System
 
 	public function loadSpecs()
 	{
-		echo 'loading specs'.PHP_EOL;
+		//echo 'loading specs'.PHP_EOL;
 		$specFile = $this->config['payload'] . $this->config['spec_file'];
 
 		$path = pathinfo($specFile, PATHINFO_DIRNAME) . DIRECTORY_SEPARATOR;
@@ -166,7 +185,7 @@ class System
 
 	public function generateContexts()
 	{
-		echo 'generating contexts'.PHP_EOL;
+		//echo 'generating contexts'.PHP_EOL;
 		ob_start();
 		echo "return array(" . PHP_EOL;
 		$contexts = array();
@@ -205,7 +224,7 @@ class System
 	{
 		$this->routes = array();
 		foreach ($this->specs->resources as $resourceName => $resource){
-			echo 'generating resources: '.$resourceName . PHP_EOL;
+			//echo 'generating resources: '.$resourceName . PHP_EOL;
 			ob_start();
 
 			echo "class $resourceName {" . PHP_EOL . PHP_EOL;
@@ -214,7 +233,19 @@ class System
 
 			echo "\t" . "function __construct(\$db){" . PHP_EOL;
 			echo "\t\t" . "\$this->db = \$db;" . PHP_EOL;
-			echo "\t" . "}" . PHP_EOL;
+			echo "\t" . "}" . PHP_EOL . PHP_EOL;
+
+			// TODO: extend base class and put these methods there
+			echo "\t" . "protected function getDataForQuery(\$query, \$data){" . PHP_EOL;
+			echo "\t\t" . "\$queryData = array();" . PHP_EOL;
+			echo "\t\t" . "preg_match_all('/:([a-zA-Z0-9_]+)/im', \$query, \$matches, PREG_SET_ORDER);" . PHP_EOL;
+			echo "\t\t" . "if (count(\$matches)){" . PHP_EOL;
+			echo "\t\t\t" . "foreach (\$matches as \$match){" . PHP_EOL;
+			echo "\t\t\t\t" . "\$queryData[\$match[1]] = \$data[\$match[1]];" . PHP_EOL;
+			echo "\t\t\t" . "}" . PHP_EOL;
+			echo "\t\t" . "}" . PHP_EOL;
+			echo "\t\t" . "return \$queryData;" . PHP_EOL;
+			echo "\t" . "}" . PHP_EOL . PHP_EOL;
 
 			// Render all validation and reciever methods
 			foreach ($resource->properties as $propertyName => $property){
@@ -242,13 +273,17 @@ class System
 						echo "\t\t" . "if (!is_float(\$value)){ \$errors[] = \"$propertyName.incorrectType.float\"; }" . PHP_EOL;
 						break;
 					case "datetime":
-
+						echo "\t\t" . "if (!is_date(\$value, 'Y-m-d H:i:s')){ \$errors[] = \"$propertyName.incorrectType.datetime\"; }" . PHP_EOL;
 						break;
 					case "date":
-
+						echo "\t\t" . "if (!is_date(\$value, 'Y-m-d')){ \$errors[] = \"$propertyName.incorrectType.date\"; }" . PHP_EOL;
 						break;
 					case "time":
-
+						// TODO: this can be improved, am/pm? no seconds?
+						echo "\t\t" . "if (!is_date(\$value, 'H:i:s')){ \$errors[] = \"$propertyName.incorrectType.time\"; }" . PHP_EOL;
+						break;
+					case "email":
+						echo "\t\t" . "if (!filter_var(\$value, FILTER_VALIDATE_EMAIL)){ \$errors[] = \"$propertyName.incorrectType.email\"; }" . PHP_EOL;
 						break;
 				}
 				if (isset($property->max_length)){
@@ -343,7 +378,7 @@ class System
 			foreach ($resource->endpoints as $route => $endpoint){
 				preg_match_all('/\{([^\}]+)\}/', $route, $matches, PREG_SET_ORDER);
 				//print_r($matches);
-				$args = array();
+				$args = array('$data');
 				$argNames = array();
 				$routeName = $route;
 				$routePattern = str_replace('/', '\/', $route);
@@ -364,28 +399,39 @@ class System
 						echo "\t". "function $methodName" . str_replace('/', '_', $routeName) . "_when_$contextName(" . implode(', ', $args) . ") {" . PHP_EOL;
 						$this->routes[$routePattern] = "array(\"class\" => \"$resourceName\", \"method\" => \"" . str_replace('/', '_', $routeName) . "\", \"args\" => array(\"".implode('", "', $argNames)."\"))";
 
-						echo "\t\t" . "\$data = array();" . PHP_EOL;
+						//echo "\t\t" . "\$data = array();" . PHP_EOL;
 						echo "\t\t" . "\$errors = array();" . PHP_EOL . PHP_EOL;
+
+						$echoed = false;
+						foreach ($args as $argName){
+							if ($argName != '$data'){
+								$echoed = true;
+								echo "\t\t" . "\$data[\"".trim($argName, '$')."\"] = $argName;" . PHP_EOL;
+							}
+						}
+						if ($echoed){
+							echo PHP_EOL;
+						}
 
 						if (isset($method->delegate)){
 							$delegate = explode('.', $method->delegate);
 							echo "\t\t" . "return Rocket::call(array(\"$delegate[0]\", \"$delegate[1]\"), \$data);" . PHP_EOL;
 						}else{
 
-							if (isset($method->queryParams)){
+							/*if (isset($method->queryParams)){
 								echo "\t\t" . "// check query string data" . PHP_EOL;
 								foreach ($method->queryParams as $paramName => $param){
 									//echo "\t\t" . "\$$paramName = \$this->receive_$paramName(\$_GET[\"$paramName\"], \$errors);" . PHP_EOL;
 								}
 								echo PHP_EOL;
-							}
+							}*/
 
 							if (isset($method->expects)){
 								echo "\t\t" . "// check for required input data" . PHP_EOL;
 								foreach ($method->expects as $expectedName){
 									$expected = $resource->properties->$expectedName;
-									echo "\t\t" . "if (!isset(\$_GET[\"$expectedName\"])){ \$errors[] = \"$expectedName.required\"; }" . PHP_EOL;
-									echo "\t\t" . "else{ \$$expectedName = \$this->receive_$expectedName(\$_GET[\"$expectedName\"], \$errors); }" . PHP_EOL;
+									echo "\t\t" . "if (!isset(\$data[\"$expectedName\"])){ \$errors[] = \"$expectedName.required\"; }" . PHP_EOL;
+									echo "\t\t" . "else{ \$data[\"$expectedName\"] = \$this->receive_$expectedName(\$data[\"$expectedName\"], \$errors); }" . PHP_EOL;
 								}
 								echo PHP_EOL;
 							}
@@ -393,12 +439,19 @@ class System
 							if (isset($method->accepts)){
 								echo "\t\t" . "// check optional input data if present" . PHP_EOL;
 								foreach ($method->accepts as $acceptedName){
-									echo "\t\t" . "if (isset(\$$acceptedName)){ \$$acceptedName = \$this->receive_$acceptedName(\$_REQUEST[\"$acceptedName\"], \$errors); }" . PHP_EOL;
+									echo "\t\t" . "if (isset(\$data[\"$acceptedName\"])){ \$data[\"$acceptedName\"] = \$this->receive_$acceptedName(\$data[\"$acceptedName\"], \$errors); }" . PHP_EOL;
 								}
 								echo PHP_EOL;
 							}
 
 							echo "\t\t" . 'if (count($errors) > 0) {' . PHP_EOL;
+							if (isset($method->traits)){
+								foreach ($method->traits as $trait){
+									if (method_exists($trait, 'on_error')){
+										echo "\t\t" . "Rocket::call(array(\"$trait\", \"on_error\"), \$data, \$errors);" . PHP_EOL;
+									}
+								}
+							}
 							if (isset($method->on_error)){
 								$on_error = explode('.', $method->on_error);
 								// TODO: pass data and errors
@@ -410,7 +463,6 @@ class System
 								echo "\t\t\t" . "throw new InvalidInputDataException(\$errors);" . PHP_EOL;
 							}
 							echo "\t\t" . '}' . PHP_EOL;
-							echo "\t\t" . '// TODO: $data = customHook($data);' . PHP_EOL;
 
 							$returnType = 'object';
 							$schema = $method->returns;
@@ -421,9 +473,25 @@ class System
 
 							$requestedFields = array();
 							foreach ($schema as $key => $value){
-								$requestedFields[] = $key;
+								if (isset($resource->properties->$key) || $key == 'id'){
+									$requestedFields[] = $key;
+								}else{
+									if (DEVELOPING){
+										throw new \Exception('Requested field "'.$key.'" from "'.$resourceName.'" but field does not exist :(');
+									}
+								}
+							}
+							if (count($requestedFields) == 0){
+								$requestedFields[] = '*';
 							}
 
+							if (isset($method->traits)){
+								foreach ($method->traits as $trait){
+									if (method_exists($trait, 'on_input')){
+										echo "\t\t" . "Rocket::call(array(\"$trait\", \"on_input\"), \$data);" . PHP_EOL;
+									}
+								}
+							}
 							if (isset($method->on_input)){
 								$on_input = explode('.', $method->on_input);
 								// TODO: pass data
@@ -439,46 +507,65 @@ class System
 										if (isset($method->sql)){
 											echo "\t\t" . "\$query = \"{$method->sql}\";" . PHP_EOL;
 										}else{
-											echo "\t\t" . "\$query = \"select ".implode(',', $requestedFields)." from $resourceName where id = :id LIMIT 1\";" . PHP_EOL;
+											echo "\t\t" . "\$query = \"SELECT ".implode(',', $requestedFields)." FROM $resourceName WHERE id = :id LIMIT 1\";" . PHP_EOL;
 										}
-										echo "\t\t" . "\$queryData = array('id' => \"1\");" . PHP_EOL;
-
+										if (isset($method->traits)){
+											foreach ($method->traits as $trait){
+												if (method_exists($trait, 'on_query')){
+													echo "\t\t" . "Rocket::call(array(\"$trait\", \"on_query\"), \$query, \$data);" . PHP_EOL;
+												}
+											}
+										}
 										if (isset($method->on_query)){
 											$on_query = explode('.', $method->on_query);
 											// TODO: pass query ref and data
-											echo "\t\t" . "Rocket::call(array(\"$on_query[0]\", \"$on_query[1]\"), \$data, \$queryData, \$query);" . PHP_EOL;
+											echo "\t\t" . "Rocket::call(array(\"$on_query[0]\", \"$on_query[1]\"), \$query, \$data);" . PHP_EOL;
 										}
+										//echo "\t\t" . "\$queryData = \$this->getDataForQuery(\$query, \$data);" . PHP_EOL;
 										echo "\t\t" . "\$statement = \$this->db->prepare(\$query);" . PHP_EOL;
-										echo "\t\t" . "\$statement->execute(\$queryData);" . PHP_EOL;
+										echo "\t\t" . "\$statement->execute( \$this->getDataForQuery(\$query, \$data) );" . PHP_EOL;
 										echo "\t\t" . "\$data = \$statement->fetch(PDO::FETCH_ASSOC);" . PHP_EOL;
 									}else if ($returnType == 'collection'){
 										if (isset($method->sql)){
 											echo "\t\t" . "\$query = \"{$method->sql}\";" . PHP_EOL;
 										}else{
-											echo "\t\t" . "\$query = \"select * from $resourceName\";" . PHP_EOL;
+											echo "\t\t" . "\$query = \"SELECT ".implode(',', $requestedFields)." FROM $resourceName\";" . PHP_EOL;
 										}
-										echo "\t\t" . "\$queryData = array();" . PHP_EOL;
-										
+										if (isset($method->traits)){
+											foreach ($method->traits as $trait){
+												if (method_exists($trait, 'on_query')){
+													echo "\t\t" . "Rocket::call(array(\"$trait\", \"on_query\"), \$query, \$data);" . PHP_EOL;
+												}
+											}
+										}
 										if (isset($method->on_query)){
 											$on_query = explode('.', $method->on_query);
 											// TODO: pass query ref and data
-											echo "\t\t" . "Rocket::call(array(\"$on_query[0]\", \"$on_query[1]\"), \$data, \$queryData, \$query);" . PHP_EOL;
+											echo "\t\t" . "Rocket::call(array(\"$on_query[0]\", \"$on_query[1]\"), \$query, \$data);" . PHP_EOL;
 										}
+										//echo "\t\t" . "\$queryData = \$this->getDataForQuery(\$query, \$data);" . PHP_EOL;
 										echo "\t\t" . "\$statement = \$this->db->prepare(\$query);" . PHP_EOL;
-										echo "\t\t" . "\$statement->execute(\$queryData);" . PHP_EOL;
+										echo "\t\t" . "\$statement->execute( \$this->getDataForQuery(\$query, \$data) );" . PHP_EOL;
 										echo "\t\t" . "\$data = \$statement->fetchAll(PDO::FETCH_ASSOC);" . PHP_EOL;
 									}
 								}else if ($methodName == "POST"){
 
 								}
 
+								if (isset($method->traits)){
+									foreach ($method->traits as $trait){
+										if (method_exists($trait, 'on_data')){
+											echo "\t\t" . "Rocket::call(array(\"$trait\", \"on_data\"), \$data);" . PHP_EOL;
+										}
+									}
+								}
 								if (isset($method->on_data)){
 									$on_data = explode('.', $method->on_data);
 									// TODO: pass data
 									echo "\t\t" . "Rocket::call(array(\"$on_data[0]\", \"$on_data[1]\"), \$data);" . PHP_EOL;
 								}
 
-								echo "\t\t" . 'return $data;' . PHP_EOL;
+								echo "\t\t" . "return \$data;" . PHP_EOL;
 							}
 						}
 						echo "\t}" . PHP_EOL . PHP_EOL;
@@ -500,7 +587,7 @@ class System
 
 	public function generateRoutes()
 	{
-		echo 'generating routes'.PHP_EOL;
+		//echo 'generating routes'.PHP_EOL;
 		$routesWithoutPlaceholder = array();
 		$routesWithPlaceholder = array();
 		$routes = array();
@@ -656,7 +743,7 @@ class System
 
 	private function guessType($name, $value)
 	{
-		if ($value->type == 'string'){
+		if ($value->type == 'string' || $value->type == 'email'){
 			if (!isset($value->max_length)){
 				$value->max_length = 50;
 			}

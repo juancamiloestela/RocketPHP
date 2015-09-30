@@ -83,6 +83,7 @@ class Response {
 	);
 
 	private $request;
+	protected $metadata = array();
 	public $config = array();
 	protected $defaults = array(
 
@@ -136,6 +137,22 @@ class Response {
 			return $this;
 		}
 		return $this->body;
+	}
+
+	function setMetadata($key, $value)
+	{
+		$this->metadata[$key] = $value;
+	}
+
+	function getMetadata($key = null)
+	{
+		if ($key){
+			if (isset($this->metadata[$key])){
+				return $this->metadata[$key];
+			}
+			return null;
+		}
+		return $this->metadata;
 	}
 
 // TODO: unify this behavior setter,getter,etc

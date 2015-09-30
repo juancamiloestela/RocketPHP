@@ -5,6 +5,19 @@ class Job {
 	function __construct($db){
 		$this->db = $db;
 	}
+
+	function getDataForQuery($query, $data){
+		$queryData = array();
+		preg_match_all('/:([a-zA-Z0-9_]+)/im', $query, $matches, PREG_SET_ORDER);
+		if (count($matches)){
+			foreach ($matches as $match){
+				$queryData[$match[1]] = $data[$match[1]];
+			}
+		}
+		echo 'QUERY DATA '.$query;print_r($queryData);
+		return $queryData;
+	}
+
 	function receive_role($value, &$errors) {
 		$errors = array_merge($errors, $this->validate_role($value));
 		return $value;
@@ -39,16 +52,14 @@ class Job {
 		return $data;
 	}
 
-	function GET_cars_when_public() {
-		$data = array();
+	function GET_cars_when_public($data) {
 		$errors = array();
 
 		if (count($errors) > 0) {
 			throw new InvalidInputDataException($errors);
 		}
-		// TODO: $data = customHook($data);
 		$query = "select * from Job";
-		$queryData = array();
+		$queryData = $this->getDataForQuery($query, $data); // array();
 		$statement = $this->db->prepare($query);
 		$statement->execute($queryData);
 		$data = $statement->fetchAll(PDO::FETCH_ASSOC);

@@ -42,7 +42,7 @@ return array(
 		'payload' => 'emails/'
 	),
 	'translator' => array(
-		'payload' => 'api/lang/'
+		'payload' => 'lang/'
 	),
 	'user' => array(
 		

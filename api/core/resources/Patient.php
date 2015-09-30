@@ -5,6 +5,19 @@ class Patient {
 	function __construct($db){
 		$this->db = $db;
 	}
+
+	function getDataForQuery($query, $data){
+		$queryData = array();
+		preg_match_all('/:([a-zA-Z0-9_]+)/im', $query, $matches, PREG_SET_ORDER);
+		if (count($matches)){
+			foreach ($matches as $match){
+				$queryData[$match[1]] = $data[$match[1]];
+			}
+		}
+		echo 'QUERY DATA '.$query;print_r($queryData);
+		return $queryData;
+	}
+
 	function receive_name($value, &$errors) {
 		$errors = array_merge($errors, $this->validate_name($value));
 		\Rocket::call(array("Delegates", "receiveName"), $value, $errors);
@@ -137,25 +150,21 @@ class Patient {
 		return $data;
 	}
 
-	function GET_patients_when_public() {
-		$data = array();
+	function GET_patients_when_public($data) {
 		$errors = array();
 
-		// check query string data
-
 		// check for required input data
-		if (!isset($_GET["name"])){ $errors[] = "name.required"; }
-		else{ $name = $this->receive_name($_GET["name"], $errors); }
+		if (!isset($data["name"])){ $errors[] = "name.required"; }
+		else{ $data["name"] = $this->receive_name($data["name"], $errors); }
 
 		if (count($errors) > 0) {
 			if (Rocket::call(array("Delegates", "publicPatientsError"), $data, $errors)){
 				throw new InvalidInputDataException($errors);
 			}
 		}
-		// TODO: $data = customHook($data);
 		Rocket::call(array("Delegates", "publicPatientsInput"), $data);
 		$query = "select * from Patient";
-		$queryData = array();
+		$queryData = $this->getDataForQuery($query, $data); // array();
 		Rocket::call(array("Delegates", "publicPatientsQuery"), $data, $queryData, $query);
 		$statement = $this->db->prepare($query);
 		$statement->execute($queryData);
@@ -164,59 +173,56 @@ class Patient {
 		return $data;
 	}
 
-	function GET_patients_when_logged() {
-		$data = array();
+	function GET_patients_when_logged($data) {
 		$errors = array();
 
 		// check for required input data
-		if (!isset($_GET["name"])){ $errors[] = "name.required"; }
-		else{ $name = $this->receive_name($_GET["name"], $errors); }
-		if (!isset($_GET["email"])){ $errors[] = "email.required"; }
-		else{ $email = $this->receive_email($_GET["email"], $errors); }
-		if (!isset($_GET["phone"])){ $errors[] = "phone.required"; }
-		else{ $phone = $this->receive_phone($_GET["phone"], $errors); }
+		if (!isset($data["name"])){ $errors[] = "name.required"; }
+		else{ $data["name"] = $this->receive_name($data["name"], $errors); }
+		if (!isset($data["email"])){ $errors[] = "email.required"; }
+		else{ $data["email"] = $this->receive_email($data["email"], $errors); }
+		if (!isset($data["phone"])){ $errors[] = "phone.required"; }
+		else{ $data["phone"] = $this->receive_phone($data["phone"], $errors); }
 
 		// check optional input data if present
-		if (isset($age)){ $age = $this->receive_age($_REQUEST["age"], $errors); }
+		if (isset($data["age"])){ $data["age"] = $this->receive_age($data["age"], $errors); }
 
 		if (count($errors) > 0) {
 			throw new InvalidInputDataException($errors);
 		}
-		// TODO: $data = customHook($data);
 		$query = "select id,name,email,phone from Patient where id = :id LIMIT 1";
-		$queryData = array('id' => "1");
+		$queryData = $this->getDataForQuery($query, $data); //array('id' => "1");
 		$statement = $this->db->prepare($query);
 		$statement->execute($queryData);
 		$data = $statement->fetch(PDO::FETCH_ASSOC);
 		return $data;
 	}
 
-	function GET_patients_when_owns() {
-		$data = array();
+	function GET_patients_when_owns($data) {
 		$errors = array();
 
 		if (count($errors) > 0) {
 			throw new InvalidInputDataException($errors);
 		}
-		// TODO: $data = customHook($data);
 		$query = "select * from Patient";
-		$queryData = array();
+		$queryData = $this->getDataForQuery($query, $data); // array();
 		$statement = $this->db->prepare($query);
 		$statement->execute($queryData);
 		$data = $statement->fetchAll(PDO::FETCH_ASSOC);
 		return $data;
 	}
 
-	function GET_patients_id_path_code_when_owns($id, $code) {
-		$data = array();
+	function GET_patients_id_path_code_when_owns($data, $id, $code) {
 		$errors = array();
+
+		$data["id"] = $id;
+		$data["code"] = $code;
 
 		if (count($errors) > 0) {
 			throw new InvalidInputDataException($errors);
 		}
-		// TODO: $data = customHook($data);
 		$query = "";
-		$queryData = array('id' => "1");
+		$queryData = $this->getDataForQuery($query, $data); //array('id' => "1");
 		$statement = $this->db->prepare($query);
 		$statement->execute($queryData);
 		$data = $statement->fetch(PDO::FETCH_ASSOC);
