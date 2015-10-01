@@ -35,7 +35,7 @@
 			},
 			"endpoints":{
 				"/users": {
-					"logged": {
+					"public": {
 						"GET": {
 							"traits": ["paginated"],
 							"returns": [{"id":"", "name":"", "email":""}]
@@ -43,9 +43,55 @@
 					}
 				},
 				"/users/{id}": {
-					"logged": {
+					"public": {
 						"GET": {
 							"returns": {"id":"", "name":""}
+						}
+					}
+				}
+			}
+		},
+		"Blogs": {
+			"description": "Blog entity",
+			"properties": {
+				"name": {
+					"type": "string",
+					"max_length": 30,
+					"min_length": 3
+				},
+				"description": {
+					"type": "string",
+					"max_length": 400
+				},
+				"created": {
+					"type": "datetime"
+				},
+				"updated": {
+					"type": "datetime"
+				}
+			},
+			"endpoints":{
+				"/blogs": {
+					"public": {
+						"GET": {
+							"traits": ["paginated"],
+							"returns": [{}]
+						},
+						"POST": {
+							"traits": ["TimeTracked"],
+							"returns": {}
+						}
+					}
+				},
+				"/blogs/{id}": {
+					"public": {
+						"GET": {
+							"traits": [],
+							"returns": {}
+						},
+						"PUT": {
+							"traits": ["TimeTracked"],
+							"returns": {}
 						}
 					}
 				}

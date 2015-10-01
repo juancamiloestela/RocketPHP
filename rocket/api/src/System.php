@@ -121,9 +121,7 @@ class System
 		foreach ($this->runtimeRoutes as $route => $controller){
 			//echo $uri . ' ' . $route . PHP_EOL;
 			if (preg_match('/^'.$route.'$/', $uri, $matches)){
-				$args = array(
-					'input' => $data
-				);
+				$args = array($data);
 				foreach ($controller['args'] as $arg){
 					$args[] = isset($matches[$arg]) ? $matches[$arg] : null;
 				}
@@ -525,6 +523,9 @@ class System
 										echo "\t\t" . "\$statement = \$this->db->prepare(\$query);" . PHP_EOL;
 										echo "\t\t" . "\$statement->execute( \$this->getDataForQuery(\$query, \$data) );" . PHP_EOL;
 										echo "\t\t" . "\$data = \$statement->fetch(PDO::FETCH_ASSOC);" . PHP_EOL;
+										echo "\t\t" . "if (!\$data){" . PHP_EOL;
+										echo "\t\t\t" . "throw new NotFoundException();" . PHP_EOL;
+										echo "\t\t" . "}" . PHP_EOL;
 									}else if ($returnType == 'collection'){
 										if (isset($method->sql)){
 											echo "\t\t" . "\$query = \"{$method->sql}\";" . PHP_EOL;
@@ -549,7 +550,47 @@ class System
 										echo "\t\t" . "\$data = \$statement->fetchAll(PDO::FETCH_ASSOC);" . PHP_EOL;
 									}
 								}else if ($methodName == "POST"){
-
+									if (isset($method->sql)){
+										echo "\t\t" . "\$query = \"{$method->sql}\";" . PHP_EOL;
+									}else{
+										//echo "\t\t" . "list(\$fields, \$values) = \$this->getReceivedData(\$data);" . PHP_EOL;
+										echo "\t\t" . "\$fields = array();" . PHP_EOL;
+										echo "\t\t" . "\$values = array();" . PHP_EOL;
+										echo "\t\t" . "\$columns = array(\"".implode('","', array_keys((array)$resource->properties))."\");" . PHP_EOL;
+										echo "\t\t" . "foreach (\$columns as \$column) {" . PHP_EOL;
+										echo "\t\t\t" . "if (isset(\$data[\$column])){" . PHP_EOL;
+										echo "\t\t\t\t" . "\$fields[] = \$column;" . PHP_EOL;
+										echo "\t\t\t\t" . "\$values[] = ':'.\$column;" . PHP_EOL;
+										echo "\t\t\t" . "}" . PHP_EOL;
+										echo "\t\t" . "}" . PHP_EOL;
+										echo "\t\t" . "\$query = \"INSERT INTO $resourceName (\".implode(',', \$fields).\") VALUES (\".implode(',', \$values).\")\";" . PHP_EOL;
+									}
+									if (isset($method->traits)){
+										foreach ($method->traits as $trait){
+											if (method_exists($trait, 'on_query')){
+												echo "\t\t" . "Rocket::call(array(\"$trait\", \"on_query\"), \$query, \$data);" . PHP_EOL;
+											}
+										}
+									}
+									if (isset($method->on_query)){
+										$on_query = explode('.', $method->on_query);
+										echo "\t\t" . "Rocket::call(array(\"$on_query[0]\", \"$on_query[1]\"), \$query, \$data);" . PHP_EOL;
+									}
+									echo "\t\t" . "\$statement = \$this->db->prepare(\$query);" . PHP_EOL;
+									echo "\t\t" . "\$statement->execute( \$this->getDataForQuery(\$query, \$data) );" . PHP_EOL;
+									echo "\t\t" . "\$id = \$this->db->lastInsertId();" . PHP_EOL;
+									echo "\t\t" . "if (!\$id){" . PHP_EOL;
+									echo "\t\t\t" . "throw new Exception('Could not create resource');" . PHP_EOL;
+									echo "\t\t" . "}" . PHP_EOL;
+									echo "\t\t" . "\$query = \"SELECT * FROM $resourceName WHERE id = :id LIMIT 1\";" . PHP_EOL;
+									echo "\t\t" . "\$statement = \$this->db->prepare(\$query);" . PHP_EOL;
+									echo "\t\t" . "\$statement->execute(array(\"id\" => \$id));" . PHP_EOL;
+									echo "\t\t" . "\$data = \$statement->fetch(PDO::FETCH_ASSOC);" . PHP_EOL;
+									echo "\t\t" . "if (!\$data){" . PHP_EOL;
+									echo "\t\t\t" . "throw new Exception('Could not create resource');" . PHP_EOL;
+									echo "\t\t" . "}" . PHP_EOL;
+								}else if ($methodName == "PUT"){
+									echo "//PUTTING" . PHP_EOL;
 								}
 
 								if (isset($method->traits)){

@@ -128,7 +128,7 @@ class Delegates{
 class Contexts{
 
 	static function is_logged($mail){
-		return true;
+		return false;
 	}
 
 	static function is_owner(){
@@ -165,9 +165,20 @@ class Paginated{
 
 class Secure{
 	static function on_input(&$data){
-		if (true){
-			//$data['authorized'] = false;
-			//throw new \UnauthorizedException();
+		if (1){
+			$data = array('error' => 'unauthorized');
+			throw new \UnauthorizedException($data);
+		}
+	}
+}
+
+class TimeTracked{
+	static function on_input(&$data, $request){
+		$datetime = (new \DateTime('now'))->format('Y-m-d H:i:s');
+		if ($request->method() == 'POST'){
+			$data['created'] = $datetime;
+		}else{
+			$data['updated'] = $datetime;
 		}
 	}
 }
@@ -197,7 +208,7 @@ try{
 	$data['errors'] = $e->errors();
 }catch (UnauthorizedException $e){
 	$data['code'] = 401;
-	$data['errors'] = $data;
+	$data['errors'] = $e->data();
 }catch (PDOException $e){
 	$data['code'] = 500;
 	$data['errors'] = "database.error";
@@ -208,7 +219,7 @@ try{
 		throw $e;
 	}else{
 		$data['code'] = 500;
-		$data['errors'] = "Whoops... Something ugly happened";
+		$data['errors'] = $e->getMessage();
 	}
 }
 

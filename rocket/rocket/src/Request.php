@@ -419,13 +419,12 @@ class Request {
 				parse_str(file_get_contents("php://input"),$_PUT_DELETE);
 			}
 
-			$data = array_merge(array(), $queryStringData, $_GET, $_POST);
-			//parse_str(file_get_contents("php://input"),$_PUT_DELETE);
-			$data = array_merge($data, $_PUT_DELETE);
-			if (isset($_SESSION['persisted_data'])){
+			$data = array_merge(array(), $queryStringData, $_GET, $_POST, $_PUT_DELETE);
+
+			/*if (isset($_SESSION['persisted_data'])){
 				$data = array_merge($data, (array) unserialize($_SESSION['persisted_data']));
 				unset($_SESSION['persisted_data']);
-			}
+			}*/
 			$this->setData($data);
 			// TODO: hook here?
 		}

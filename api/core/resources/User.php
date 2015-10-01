@@ -56,7 +56,7 @@ class User {
 		return $errors;
 	}
 
-	function GET_users_when_logged($data) {
+	function GET_users_when_public($data) {
 		$errors = array();
 
 		if (count($errors) > 0) {
@@ -72,7 +72,7 @@ class User {
 		return $data;
 	}
 
-	function GET_users_id_when_logged($data, $id) {
+	function GET_users_id_when_public($data, $id) {
 		$errors = array();
 
 		$data["id"] = $id;
@@ -84,6 +84,9 @@ class User {
 		$statement = $this->db->prepare($query);
 		$statement->execute( $this->getDataForQuery($query, $data) );
 		$data = $statement->fetch(PDO::FETCH_ASSOC);
+		if (!$data){
+			throw new NotFoundException();
+		}
 		return $data;
 	}
 
