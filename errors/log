@@ -1,0 +1,4 @@
+[04-Oct-2015 21:15:15 UTC] PHP Fatal error:  Call to a member function tables() on a non-object in /Users/Juank/Sites/ApiGenerator/rocket/api/src/System.php on line 1017
+[04-Oct-2015 21:16:43 UTC] PHP Fatal error:  Call to a member function tables() on a non-object in /Users/Juank/Sites/ApiGenerator/rocket/api/src/System.php on line 1019
+[04-Oct-2015 21:28:11 UTC] PHP Fatal error:  Class 'Rocket\Api\Generator' not found in /Users/Juank/Sites/ApiGenerator/rocket/api/src/System.php on line 51
+[04-Oct-2015 21:28:25 UTC] PHP Fatal error:  Cannot access protected property Rocket\Api\System::$db in /Users/Juank/Sites/ApiGenerator/rocket/api/src/Generator.php on line 867

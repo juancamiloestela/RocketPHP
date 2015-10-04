@@ -13,8 +13,10 @@ class System
 
 	public $config = array();
 	protected $defaults = array(
+		'payload' => 'errors/',
 		'show_errors' => true,
-		'log_errors' => true
+		'log_errors' => true,
+		'error_log' => 'log'
 	);
 
 	public function __construct($config = array())
@@ -22,9 +24,11 @@ class System
 		$this->config = array_merge($this->defaults, $config);
 		ob_start();
 
+		$this->checkFolderStructure();
+
 		if ($this->config['log_errors']){
 			ini_set('log_errors', 1);
-			ini_set('error_log', $this->config['log_errors']);
+			ini_set('error_log', $this->config['payload'] . DIRECTORY_SEPARATOR . $this->config['error_log']);
 		}
 
 		if ($this->config['show_errors']){
@@ -43,6 +47,14 @@ class System
 		set_error_handler(array($this, 'handleError'));
 		set_exception_handler(array($this, 'handleException'));
 		register_shutdown_function(array($this,'shutdownHandler'), $this);
+	}
+
+	public function checkFolderStructure()
+	{
+		// TODO: this should happen to all systems, extend?
+		if (!file_exists($this->config['payload'])){
+			mkdir($this->config['payload'], 0755, true);
+		}
 	}
 
 	public function shutdownHandler(&$instance)
