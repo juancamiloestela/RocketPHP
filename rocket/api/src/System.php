@@ -33,6 +33,11 @@ class System
 		if (DEVELOPING){
 			$this->generator = new Generator($this);
 		}
+
+		$this->contexts = include $this->config['core_path'] . 'contexts.php';
+		$this->routes = include $this->config['core_path'] . 'routes.php';
+
+		$this->evaluateContexts();
 	}
 
 	public function checkFolderStructure()
@@ -60,15 +65,6 @@ class System
 			include $filename;
 			return;
 		}
-	}
-
-	public function launch()
-	{
-
-		$this->contexts = include $this->config['core_path'] . 'contexts.php';
-		$this->routes = include $this->config['core_path'] . 'routes.php';
-
-		$this->evaluateContexts();
 	}
 
 	private function evaluateContexts()
@@ -113,7 +109,7 @@ class System
 		return false;
 	}
 
-	public function handle($uri, $request_method, $data = array())
+	public function launch($uri, $request_method, $data = array(), $internal = false)
 	{
 
 		foreach ($this->routes as $route => $controller){
@@ -132,9 +128,11 @@ class System
 				$method = $request_method . $controller['method'] . '_when_' . $context; // + context & method signature
 //echo $method;
 				if (method_exists($instance, $method)){
-					// allow hooks to access current controller
-					\Rocket::set('controller', $instance);
-					return call_user_func_array(array($instance, $method), $args);
+					if ($internal || $instance::methodIsExposed($method)){
+						// allow hooks to access current controller
+						\Rocket::set('controller', $instance);
+						return call_user_func_array(array($instance, $method), $args);
+					}
 				}
 				break;
 			}

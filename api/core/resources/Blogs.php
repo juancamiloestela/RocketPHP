@@ -9,6 +9,7 @@ class Blogs {
 
 	protected $db;
 	protected $fields = array("name","description","posts","owner","created","updated");
+	protected static $notExposed = array("");
 
 	function __construct($db){
 		$this->db = $db;
@@ -25,6 +26,13 @@ class Blogs {
 			}
 		}
 		return $queryData;
+	}
+
+	public static function methodIsExposed($method){
+		if (in_array($method, static::$notExposed)){
+			return false;
+		}
+		return true;
 	}
 
 	function receive_name($value, &$errors) {

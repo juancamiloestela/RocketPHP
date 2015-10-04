@@ -3,15 +3,15 @@
  * TODO
  * - detect lang on request class, accept headers and override lang param
  * * execute all contexts one time and keep state
- * - cleanup and reorder rocket.php code
+ * * cleanup and reorder rocket.php code
  * - debugging global to control if exceptions are propagated or not
- * - build hooks/delegates logic
+ * * build hooks/delegates logic
  * - generator script
- * - sync db
+ * * sync db
  * - cleanup config/folder structure/composer project
- * - datatypes: date, numbers, float, int, relations
- * - traits paged, etc
- * - exposed
+ * * datatypes: date, numbers, float, int, relations
+ * * traits paged, etc
+ * * exposed
  * - documentator script
  *
  * Roadmap
@@ -93,13 +93,9 @@ $translator = Rocket::set('translator', new \Rocket\Translator\System($request, 
 $api = Rocket::set('api', new \Rocket\Api\System($database, $config['api']));
 
 
-$api->launch();//$database, $config['rocket']);
-
-
-
 $data = array();
 try{
-	$data['data'] = $api->handle($request->uri(), $request->method(), $request->data());
+	$data['data'] = $api->launch($request->uri(), $request->method(), $request->data());
 	$data['code'] = 200;
 }catch (NotFoundException $e){
 	$data['code'] = 404;

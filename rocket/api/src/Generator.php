@@ -126,6 +126,19 @@ class Generator{
 
 			echo "\t" . "protected \$db;" . PHP_EOL;
 			echo "\t" . "protected \$fields = array(\"".implode('","', array_keys((array)$resource->properties))."\");" . PHP_EOL;
+			$notExposed = array();
+			foreach ($resource->endpoints as $route => $endpoint){
+				foreach ($endpoint as $contextName => $context){
+					foreach ($context as $methodName => $method){
+						if (isset($method->exposed) && $method->exposed === false){
+							$methodName = strtoupper($methodName);
+							$routeName = str_replace(array('{', '}'), '', $route);
+							$notExposed[] = $methodName . str_replace('/', '_', $routeName) . "_when_$contextName";
+						}
+					}
+				}
+			}
+			echo "\t" . "protected static \$notExposed = array(\"".implode('","', $notExposed)."\");" . PHP_EOL; 
 			echo  PHP_EOL;
 
 			echo "\t" . "function __construct(\$db){" . PHP_EOL;
@@ -144,6 +157,13 @@ class Generator{
 			echo "\t\t\t" . "}" . PHP_EOL;
 			echo "\t\t" . "}" . PHP_EOL;
 			echo "\t\t" . "return \$queryData;" . PHP_EOL;
+			echo "\t" . "}" . PHP_EOL . PHP_EOL;
+
+			echo "\t" . "public static function methodIsExposed(\$method){" . PHP_EOL;
+			echo "\t\t" . "if (in_array(\$method, static::\$notExposed)){" . PHP_EOL;
+			echo "\t\t\t" . "return false;" . PHP_EOL;
+			echo "\t\t" . "}" . PHP_EOL;
+			echo "\t\t" . "return true;" . PHP_EOL;
 			echo "\t" . "}" . PHP_EOL . PHP_EOL;
 
 			// Render all validation and reciever methods

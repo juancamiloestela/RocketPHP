@@ -9,6 +9,7 @@ class User {
 
 	protected $db;
 	protected $fields = array("name","email","password","blog");
+	protected static $notExposed = array("");
 
 	function __construct($db){
 		$this->db = $db;
@@ -25,6 +26,13 @@ class User {
 			}
 		}
 		return $queryData;
+	}
+
+	public static function methodIsExposed($method){
+		if (in_array($method, static::$notExposed)){
+			return false;
+		}
+		return true;
 	}
 
 	function receive_name($value, &$errors) {

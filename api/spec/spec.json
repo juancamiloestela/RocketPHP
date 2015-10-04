@@ -93,6 +93,7 @@
 				"/blogs": {
 					"public": {
 						"GET": {
+							"exposed": true,
 							"traits": ["paginated"],
 							"returns": [{}]
 						},
