@@ -28,6 +28,7 @@ class System
 		$this->db = $db;
 
 		$this->checkFolderStructure();
+		spl_autoload_register(array($this, 'autoload'));
 
 		if (DEVELOPING){
 			$this->generator = new Generator($this);
@@ -50,7 +51,19 @@ class System
 		}
 	}
 
-	public function launch(){
+	public function autoload($class)
+	{
+		$file = str_replace('\\', DIRECTORY_SEPARATOR, $class);
+
+		$filename = $this->config['payload'] . 'overrides' . DIRECTORY_SEPARATOR . $file . '.php';
+		if (file_exists($filename)){
+			include $filename;
+			return;
+		}
+	}
+
+	public function launch()
+	{
 
 		$this->contexts = include $this->config['core_path'] . 'contexts.php';
 		$this->routes = include $this->config['core_path'] . 'routes.php';
@@ -100,7 +113,8 @@ class System
 		return false;
 	}
 
-	public function handle($uri, $request_method, $data = array()){
+	public function handle($uri, $request_method, $data = array())
+	{
 
 		foreach ($this->routes as $route => $controller){
 //echo $uri . ' ' . $route . PHP_EOL;

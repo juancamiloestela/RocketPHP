@@ -234,4 +234,24 @@ class Posts {
 		return $data;
 	}
 
+	function GET_posts_tagged_tag_when_public($data, $tag) {
+		$errors = array();
+
+		$data["tag"] = $tag;
+
+		if (count($errors)) {
+			throw new \InvalidInputDataException($errors);
+		}
+
+		$query = "SELECT * FROM Posts WHERE id = :id LIMIT 1";
+		\Rocket::call(array("Tags", "on_query"), $query, $data);
+		$statement = $this->db->prepare($query);
+		$statement->execute( $this->getDataForQuery($query, $data) );
+		$data = $statement->fetch(\PDO::FETCH_ASSOC);
+		if (!$data){
+			throw new \NotFoundException();
+		}
+		return $data;
+	}
+
 }

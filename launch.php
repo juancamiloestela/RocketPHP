@@ -22,7 +22,7 @@
  */
 
 
-define('DEVELOPING', true);
+define('DEVELOPING', true); //TODO: abstract this into config logic
 
 if (!defined('APP_PATH')){
 	define('APP_PATH', __DIR__);
@@ -83,130 +83,6 @@ include 'rocket/api/src/System.php';
 	}
 	// CSRF
 	// translation
-
-
-class Delegates{
-
-	static function receiveName(&$value, &$errors){
-		echo __METHOD__ . PHP_EOL;
-		echo "value: " . PHP_EOL; print_r($value); echo PHP_EOL;
-		echo "errors: " . PHP_EOL; print_r($errors);
-		echo PHP_EOL . PHP_EOL;
-		$value = $value . '_name';
-		return $value;
-	}
-
-	static function publicPatientsError(&$data, &$errors, $mail){
-		echo __METHOD__ . PHP_EOL;
-		echo "data: " . PHP_EOL; print_r($data);
-		echo "errors: " . PHP_EOL; print_r($errors);
-		echo "mail: " . PHP_EOL; print_r($mail);
-		echo PHP_EOL . PHP_EOL;
-		$errors[] = 'injected error';
-		return true; // enables/disables exception
-	}
-	static function publicPatientsInput(&$data, $mail){
-		echo __METHOD__ . PHP_EOL;
-		echo "data: " . PHP_EOL; print_r($data);
-		echo "mail: " . PHP_EOL; print_r($mail);
-		echo PHP_EOL . PHP_EOL;
-	}
-	static function publicPatientsQuery($query, $data){
-		echo __METHOD__ . PHP_EOL;
-		echo "data: " . PHP_EOL; print_r($data);
-		echo "query: " . PHP_EOL; print_r($query);
-		echo PHP_EOL . PHP_EOL;
-	}
-	static function publicPatientsData($data, $mail){
-		echo __METHOD__ . PHP_EOL;
-		echo "data: " . PHP_EOL; print_r($data);
-		echo PHP_EOL . PHP_EOL;
-		print_r($mail);
-	}
-}
-
-class Contexts{
-
-	static function is_logged($mail){
-		//return false;
-	}
-
-	static function is_owner(){
-		return false;
-	}
-
-	static function is_admin(){
-		return false;
-	}
-}
-
-
-class Tags{
-	static function on_query(&$query, $data){
-		// modify query
-		$query = str_replace('id = :id', 'text = :tag', $query);
-	}
-}
-
-class Paginated{
-
-	static function on_spec(&$spec){
-		$spec->properties = array(
-			"created" => array("type" => "datetime"),
-			"updated" => array("type" => "datetime")
-		);
-	}
-
-	static function on_input(&$data, $mail){
-		// ensure values are set
-		$data['offset'] = isset($data['offset']) ? $data['offset'] : 0;
-		$data['length'] = isset($data['length']) ? $data['length'] : 10;
-	}
-
-	static function on_query(&$query, $data){
-		// modify query
-		$query = str_replace('SELECT ', 'SELECT SQL_CALC_FOUND_ROWS ', $query) . " LIMIT :offset, :length";
-	}
-
-	static function on_data($data, $database, $response){
-		// get total records and push them to response metadata
-		$statement = $database->prepare("SELECT FOUND_ROWS();");
-		$statement->execute();
-		$total = $statement->fetch();
-		$response->setMetadata('total', $total[0]);
-	}
-}
-
-class Secure{
-
-	static function check(){
-		return false;
-	}
-
-	static function on_input(&$data){
-		if (1){
-			$data = array('error' => 'unauthorized');
-			throw new \UnauthorizedException($data);
-		}
-	}
-}
-
-class TimeTracked{
-
-	static function on_properties(&$properties){
-		$properties->created = (object)array("type" => "datetime");
-		$properties->updated = (object)array("type" => "datetime");
-	}
-
-	static function on_input(&$data, $request){
-		$datetime = (new \DateTime('now'))->format('Y-m-d H:i:s');
-		if ($request->method() == 'POST'){
-			$data['created'] = $datetime;
-		}else{
-			$data['updated'] = $datetime;
-		}
-	}
-}
 
 $request = Rocket::set('request', new \Rocket\Request($config['request']));
 $response = Rocket::set('response', new \Rocket\Response($config['response']));

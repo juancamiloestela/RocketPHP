@@ -196,6 +196,14 @@
 							"returns": "tags"
 						}
 					}
+				},
+				"/posts/tagged/{tag}": {
+					"public": {
+						"GET": {
+							"on_query": "Tags.on_query",
+							"returns": {}
+						}
+					}
 				}
 			}
 		},
