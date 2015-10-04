@@ -271,11 +271,9 @@ class Request {
 	 */
 	function method(){
 		if ($this->method === null){
-			$valid = array('post','put','delete','POST','PUT','DELETE');
-			if (isset($_POST['REQUEST_METHOD']) && in_array($_POST['REQUEST_METHOD'], $valid)){
-				$method = $_POST['REQUEST_METHOD'];
-			}else if (isset($_GET['REQUEST_METHOD']) && in_array($_GET['REQUEST_METHOD'], $valid)){
-				$method = $_GET['REQUEST_METHOD'];
+			// allow overriding method during post
+			if (count($_POST) && $this->data('REQUEST_METHOD')){
+				$method = $this->data('REQUEST_METHOD');
 			}else if(isset($_SERVER['REQUEST_METHOD'])){
 				$method = $_SERVER['REQUEST_METHOD'];
 			}else{
@@ -407,7 +405,7 @@ class Request {
 	function data($key = false)
 	{
 		if ($this->data === null){
-			parse_str($this->queryString(), $queryStringData); // TODO: test if this is needed, isn't it the same as $_GET?
+			//parse_str($this->queryString(), $queryStringData); // TODO: test if this is needed, isn't it the same as $_GET?
 			// TODO: handle content types here
 			if (isset($_SERVER['CONTENT_TYPE']) && preg_match('/application\/json/', $_SERVER['CONTENT_TYPE'])){
 				$jsonInput = json_decode(file_get_contents("php://input"), true);
@@ -419,12 +417,13 @@ class Request {
 				parse_str(file_get_contents("php://input"),$_PUT_DELETE);
 			}
 
-			$data = array_merge(array(), $queryStringData, $_GET, $_POST, $_PUT_DELETE);
+			$data = array_merge(array(), $_GET, $_POST, $_PUT_DELETE);
 
 			/*if (isset($_SESSION['persisted_data'])){
 				$data = array_merge($data, (array) unserialize($_SESSION['persisted_data']));
 				unset($_SESSION['persisted_data']);
 			}*/
+
 			$this->setData($data);
 			// TODO: hook here?
 		}

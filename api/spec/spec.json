@@ -4,11 +4,14 @@
 	"version": "v1.0",
 	"contexts": {
 		"public": [],
-		"logged": ["Contexts::is_logged"],
-		"owns": ["Contexts::is_logged", "Contexts::is_owner", "Contexts::is_admin"]
+		"logged": ["Secure::check"],
+		"owns": ["Secure::check", "Contexts::is_owner", "Contexts::is_admin"]
 	},
 	"traits": {
 		"paginated": {
+			"description": "description of trait"
+		},
+		"secure": {
 			"description": "description of trait"
 		}
 	},
@@ -31,6 +34,13 @@
 					"type": "string",
 					"max_length": 60,
 					"min_length": 60
+				},
+				"blog": {
+					"type": {
+						"relation": "has-one",
+						"resource": "Blogs",
+						"on": "owner"
+					}
 				}
 			},
 			"endpoints":{
@@ -53,6 +63,7 @@
 		},
 		"Blogs": {
 			"description": "Blog entity",
+			"traits": ["TimeTracked"],
 			"properties": {
 				"name": {
 					"type": "string",
@@ -63,11 +74,19 @@
 					"type": "string",
 					"max_length": 400
 				},
-				"created": {
-					"type": "datetime"
+				"posts": {
+					"type": {
+						"relation": "has-many",
+						"resource": "Posts",
+						"on": "blog"
+					}
 				},
-				"updated": {
-					"type": "datetime"
+				"owner": {
+					"type": {
+						"relation": "has-one",
+						"resource": "User",
+						"on": "blog"
+					}
 				}
 			},
 			"endpoints":{
@@ -92,6 +111,146 @@
 						"PUT": {
 							"traits": ["TimeTracked"],
 							"returns": {}
+						}
+					}
+				},
+				"/blogs/{id}/posts": {
+					"public": {
+						"GET": {
+							"returns": "posts"
+						}
+					}
+				},
+				"/blogs/{id}/owner": {
+					"public": {
+						"GET": {
+							"returns": "owner"
+						}
+					}
+				}
+			}
+		},
+		"Posts": {
+			"description": "Post entity",
+			"traits": ["TimeTracked"],
+			"properties": {
+				"title": {
+					"type": "string",
+					"max_length": 30,
+					"min_length": 3
+				},
+				"body": {
+					"type": "string",
+					"max_length": 1000
+				},
+				"blog": {
+					"type": {
+						"relation": "has-one",
+						"resource": "Blogs",
+						"on": "posts"
+					}
+				},
+				"tags": {
+					"type": {
+						"relation": "has-many",
+						"resource": "Tags",
+						"on": "posts"
+					}
+				}
+			},
+			"endpoints":{
+				"/posts": {
+					"public": {
+						"GET": {
+							"traits": ["paginated"],
+							"returns": [{}]
+						},
+						"POST": {
+							"traits": ["TimeTracked"],
+							"returns": {}
+						}
+					}
+				},
+				"/posts/{id}": {
+					"public": {
+						"GET": {
+							"traits": [],
+							"returns": {}
+						},
+						"PUT": {
+							"traits": ["TimeTracked"],
+							"returns": {}
+						}
+					}
+				},
+				"/posts/{id}/blog": {
+					"public": {
+						"GET": {
+							"returns": {}
+						}
+					}
+				},
+				"/posts/{id}/tags": {
+					"public": {
+						"GET": {
+							"returns": "tags"
+						}
+					}
+				}
+			}
+		},
+		"Tags": {
+			"description": "Tag entity",
+			"properties": {
+				"text": {
+					"type": "string",
+					"max_length": 30,
+					"min_length": 3
+				},
+				"posts": {
+					"type": {
+						"relation": "has-many",
+						"resource": "Posts",
+						"on": "tags"
+					}
+				}
+			},
+			"endpoints":{
+				"/tags": {
+					"public": {
+						"GET": {
+							"traits": ["paginated"],
+							"returns": [{}]
+						}
+					}
+				},
+				"/tags/{id}": {
+					"public": {
+						"GET": {
+							"returns": {}
+						}
+					}
+				},
+				"/tags/{id}/posts": {
+					"public": {
+						"GET": {
+							"returns": "posts"
+						}
+					}
+				},
+				"/tagged/{tag}": {
+					"public": {
+						"GET": {
+							"on_query": "Tags.on_query",
+							"returns": {}
+						}
+					}
+				},
+				"/tagged/{tag}/posts": {
+					"public": {
+						"GET": {
+							"on_query": "Tags.on_query",
+							"returns": "posts"
 						}
 					}
 				}

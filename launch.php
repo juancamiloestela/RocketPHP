@@ -128,7 +128,7 @@ class Delegates{
 class Contexts{
 
 	static function is_logged($mail){
-		return false;
+		//return false;
 	}
 
 	static function is_owner(){
@@ -141,7 +141,21 @@ class Contexts{
 }
 
 
+class Tags{
+	static function on_query(&$query, $data){
+		// modify query
+		$query = str_replace('id = :id', 'text = :tag', $query);
+	}
+}
+
 class Paginated{
+
+	static function on_spec(&$spec){
+		$spec->properties = array(
+			"created" => array("type" => "datetime"),
+			"updated" => array("type" => "datetime")
+		);
+	}
 
 	static function on_input(&$data, $mail){
 		// ensure values are set
@@ -164,6 +178,11 @@ class Paginated{
 }
 
 class Secure{
+
+	static function check(){
+		return false;
+	}
+
 	static function on_input(&$data){
 		if (1){
 			$data = array('error' => 'unauthorized');
@@ -173,6 +192,12 @@ class Secure{
 }
 
 class TimeTracked{
+
+	static function on_properties(&$properties){
+		$properties->created = (object)array("type" => "datetime");
+		$properties->updated = (object)array("type" => "datetime");
+	}
+
 	static function on_input(&$data, $request){
 		$datetime = (new \DateTime('now'))->format('Y-m-d H:i:s');
 		if ($request->method() == 'POST'){
