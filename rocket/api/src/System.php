@@ -2,7 +2,7 @@
 namespace Rocket\Api;
 
 include 'helpers.php';
-include 'Generator.php';
+include 'Resource.php';
 
 class System
 {
@@ -31,6 +31,7 @@ class System
 		spl_autoload_register(array($this, 'autoload'));
 
 		if (DEVELOPING){
+			include 'Generator.php';
 			$this->generator = new Generator($this);
 		}
 

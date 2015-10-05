@@ -7,7 +7,6 @@ include 'Response.php';
 class Rocket{
 
 	private static $instances = [];
-	private static $classes = [];
 
 	public static $config = array();
 	protected static $defaults = array(
@@ -17,7 +16,6 @@ class Rocket{
 
 	public static function &set($id, $instance){
 		static::$instances[$id] = $instance;
-		static::$classes[get_class($instance)] = &static::$instances[$id];
 		return $instance;
 	}
 

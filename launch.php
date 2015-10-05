@@ -23,6 +23,7 @@
  * * cascading hook logic, apply a trait at api/resource/endpoint/context/request_method level
  * - global hooks at application level eg. before routing ->launch() method
  * - resource name collisions
+ * - generate "minimized";
  */
 
 
@@ -32,9 +33,9 @@ if (!defined('APP_PATH')){
 	define('APP_PATH', __DIR__);
 }
 
-if (!defined('APP_ROOT')){
+//if (!defined('APP_ROOT')){
 	//define('APP_ROOT', str_replace($_SERVER['DOCUMENT_ROOT'], '', getcwd()));
-}
+//}
 
 define('PUBLIC_PATH', getcwd());
 chdir(APP_PATH);
@@ -88,6 +89,7 @@ include 'rocket/api/src/System.php';
 	// CSRF
 	// translation
 
+$config = Rocket::set('config', $config);
 $request = Rocket::set('request', new \Rocket\Request($config['request']));
 $response = Rocket::set('response', new \Rocket\Response($config['response']));
 $database = Rocket::set('database', new \Rocket\Database\System($config['database']));
