@@ -108,7 +108,14 @@ class Generator{
 		foreach ($this->specs->resources as $resourceName => $resource){
 			//echo 'generating resources: '.$resourceName . PHP_EOL;
 
+			$parentTraits = array();
+
+			if (isset($this->specs->traits)){
+				$parentTraits = array_merge($parentTraits, $this->specs->traits);
+			}
+
 			if (isset($resource->traits)){
+				$parentTraits = array_merge($parentTraits, $resource->traits);
 				foreach ($resource->traits as $traitName){
 					if (method_exists($traitName, 'on_properties')){
 						\Rocket::call(array($traitName, "on_properties"), $resource->properties);
@@ -311,10 +318,24 @@ class Generator{
 				}
 
 				foreach ($endpoint as $contextName => $context){
+					if ($contextName == 'traits'){
+						$parentTraits = array_merge($parentTraits, $endpoint->traits);
+						continue;
+					}
 					$contextChecks = $this->specs->contexts->$contextName;
 
 					foreach ($context as $methodName => $method){
+						if ($methodName == 'traits'){
+							$parentTraits = array_merge($parentTraits, $context->traits);
+							continue;
+						}
 						$methodName = strtoupper($methodName);
+
+						if (!isset($method->traits)){
+							$method->traits = array();
+						}
+						$method->traits = array_unique(array_merge($parentTraits, $method->traits));
+
 						echo "\t". "function $methodName" . str_replace('/', '_', $routeName) . "_when_$contextName(" . implode(', ', $args) . ") {" . PHP_EOL;
 						$this->routes[$routePattern] = "array(\"class\" => \"$resourceName\", \"method\" => \"" . str_replace('/', '_', $routeName) . "\", \"args\" => array(\"".implode('", "', $argNames)."\"))";
 
@@ -330,6 +351,14 @@ class Generator{
 						}
 						if ($echoed){
 							echo PHP_EOL;
+						}
+
+						if (isset($method->traits)){
+							foreach ($method->traits as $trait){
+								if (method_exists($trait, 'on_start')){
+									echo "\t\t" . "\Rocket::call(array(\"$trait\", \"on_start\"), \$data);" . PHP_EOL;
+								}
+							}
 						}
 
 						if (isset($method->delegate)){
@@ -371,6 +400,7 @@ class Generator{
 									}
 								}
 							}
+							// TODO: include below logic into trait logic above "control exception trigger"
 							if (isset($method->on_error)){
 								$on_error = explode('.', $method->on_error);
 								// TODO: pass data and errors

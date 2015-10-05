@@ -72,6 +72,7 @@ class Tags {
 	function GET_tags_when_public($data) {
 		$errors = array();
 
+		\Rocket::call(array("ResponseTime", "on_start"), $data);
 		if (count($errors)) {
 			throw new \InvalidInputDataException($errors);
 		}
@@ -82,6 +83,7 @@ class Tags {
 		$statement = $this->db->prepare($query);
 		$statement->execute( $this->getDataForQuery($query, $data) );
 		$data = $statement->fetchAll(\PDO::FETCH_ASSOC);
+		\Rocket::call(array("ResponseTime", "on_data"), $data);
 		\Rocket::call(array("paginated", "on_data"), $data);
 		return $data;
 	}
@@ -91,6 +93,7 @@ class Tags {
 
 		$data["id"] = $id;
 
+		\Rocket::call(array("ResponseTime", "on_start"), $data);
 		if (count($errors)) {
 			throw new \InvalidInputDataException($errors);
 		}
@@ -102,6 +105,7 @@ class Tags {
 		if (!$data){
 			throw new \NotFoundException();
 		}
+		\Rocket::call(array("ResponseTime", "on_data"), $data);
 		return $data;
 	}
 
@@ -110,11 +114,13 @@ class Tags {
 
 		$data["id"] = $id;
 
+		\Rocket::call(array("ResponseTime", "on_start"), $data);
 		if (count($errors)) {
 			throw new \InvalidInputDataException($errors);
 		}
 
 		$data = $this->posts($id);
+		\Rocket::call(array("ResponseTime", "on_data"), $data);
 		return $data;
 	}
 
@@ -123,6 +129,7 @@ class Tags {
 
 		$data["tag"] = $tag;
 
+		\Rocket::call(array("ResponseTime", "on_start"), $data);
 		if (count($errors)) {
 			throw new \InvalidInputDataException($errors);
 		}
@@ -135,6 +142,7 @@ class Tags {
 		if (!$data){
 			throw new \NotFoundException();
 		}
+		\Rocket::call(array("ResponseTime", "on_data"), $data);
 		return $data;
 	}
 
@@ -143,11 +151,13 @@ class Tags {
 
 		$data["tag"] = $tag;
 
+		\Rocket::call(array("ResponseTime", "on_start"), $data);
 		if (count($errors)) {
 			throw new \InvalidInputDataException($errors);
 		}
 
 		$data = $this->posts($id);
+		\Rocket::call(array("ResponseTime", "on_data"), $data);
 		return $data;
 	}
 

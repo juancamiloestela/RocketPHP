@@ -1,6 +1,7 @@
 <?php
 namespace Rocket\Translator;
 
+include 'functions.php';
 
 class System
 {
@@ -19,6 +20,8 @@ class System
 		$this->config = array_merge($this->defaults, $config);
 		$this->request = $request;
 
+		$this->checkFolderStructure();
+
 		$lang = $request->lang();
 		if (!file_exists($this->config['payload'] . $lang . '.php')){
 			$lang = substr($lang, 0, 2);
@@ -28,6 +31,14 @@ class System
 		}
 		$this->lang = $lang;
 		$this->loadTranslation($lang);
+	}
+
+	public function checkFolderStructure()
+	{
+		// TODO: this should happen to all systems, extend?
+		if (!file_exists($this->config['payload'])){
+			mkdir($this->config['payload'], 0755, true);
+		}
 	}
 
 	public function loadTranslation($lang)
@@ -42,8 +53,4 @@ class System
 		}
 		return $key;
 	}
-}
-
-function t($key){
-	return System::translate($key);
 }

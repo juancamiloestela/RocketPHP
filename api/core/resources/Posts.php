@@ -127,16 +127,19 @@ class Posts {
 	function GET_posts_when_public($data) {
 		$errors = array();
 
+		\Rocket::call(array("ResponseTime", "on_start"), $data);
 		if (count($errors)) {
 			throw new \InvalidInputDataException($errors);
 		}
 
+		\Rocket::call(array("TimeTracked", "on_input"), $data);
 		\Rocket::call(array("paginated", "on_input"), $data);
 		$query = "SELECT * FROM Posts";
 		\Rocket::call(array("paginated", "on_query"), $query, $data);
 		$statement = $this->db->prepare($query);
 		$statement->execute( $this->getDataForQuery($query, $data) );
 		$data = $statement->fetchAll(\PDO::FETCH_ASSOC);
+		\Rocket::call(array("ResponseTime", "on_data"), $data);
 		\Rocket::call(array("paginated", "on_data"), $data);
 		return $data;
 	}
@@ -144,6 +147,7 @@ class Posts {
 	function POST_posts_when_public($data) {
 		$errors = array();
 
+		\Rocket::call(array("ResponseTime", "on_start"), $data);
 		if (count($errors)) {
 			throw new \InvalidInputDataException($errors);
 		}
@@ -164,6 +168,7 @@ class Posts {
 		if (!$data){
 			throw new \Exception('Could not create resource');
 		}
+		\Rocket::call(array("ResponseTime", "on_data"), $data);
 		return $data;
 	}
 
@@ -172,10 +177,12 @@ class Posts {
 
 		$data["id"] = $id;
 
+		\Rocket::call(array("ResponseTime", "on_start"), $data);
 		if (count($errors)) {
 			throw new \InvalidInputDataException($errors);
 		}
 
+		\Rocket::call(array("TimeTracked", "on_input"), $data);
 		$query = "SELECT * FROM Posts WHERE id = :id LIMIT 1";
 		$statement = $this->db->prepare($query);
 		$statement->execute( $this->getDataForQuery($query, $data) );
@@ -183,6 +190,7 @@ class Posts {
 		if (!$data){
 			throw new \NotFoundException();
 		}
+		\Rocket::call(array("ResponseTime", "on_data"), $data);
 		return $data;
 	}
 
@@ -191,6 +199,7 @@ class Posts {
 
 		$data["id"] = $id;
 
+		\Rocket::call(array("ResponseTime", "on_start"), $data);
 		if (count($errors)) {
 			throw new \InvalidInputDataException($errors);
 		}
@@ -207,6 +216,7 @@ class Posts {
 		if (!$result){
 			throw new \Exception('Could not update resource');
 		}
+		\Rocket::call(array("ResponseTime", "on_data"), $data);
 		return $data;
 	}
 
@@ -215,10 +225,12 @@ class Posts {
 
 		$data["id"] = $id;
 
+		\Rocket::call(array("ResponseTime", "on_start"), $data);
 		if (count($errors)) {
 			throw new \InvalidInputDataException($errors);
 		}
 
+		\Rocket::call(array("TimeTracked", "on_input"), $data);
 		$query = "SELECT * FROM Posts WHERE id = :id LIMIT 1";
 		$statement = $this->db->prepare($query);
 		$statement->execute( $this->getDataForQuery($query, $data) );
@@ -226,6 +238,7 @@ class Posts {
 		if (!$data){
 			throw new \NotFoundException();
 		}
+		\Rocket::call(array("ResponseTime", "on_data"), $data);
 		return $data;
 	}
 
@@ -234,11 +247,14 @@ class Posts {
 
 		$data["id"] = $id;
 
+		\Rocket::call(array("ResponseTime", "on_start"), $data);
 		if (count($errors)) {
 			throw new \InvalidInputDataException($errors);
 		}
 
+		\Rocket::call(array("TimeTracked", "on_input"), $data);
 		$data = $this->tags($id);
+		\Rocket::call(array("ResponseTime", "on_data"), $data);
 		return $data;
 	}
 
@@ -247,10 +263,12 @@ class Posts {
 
 		$data["tag"] = $tag;
 
+		\Rocket::call(array("ResponseTime", "on_start"), $data);
 		if (count($errors)) {
 			throw new \InvalidInputDataException($errors);
 		}
 
+		\Rocket::call(array("TimeTracked", "on_input"), $data);
 		$query = "SELECT * FROM Posts WHERE id = :id LIMIT 1";
 		\Rocket::call(array("Tags", "on_query"), $query, $data);
 		$statement = $this->db->prepare($query);
@@ -259,6 +277,7 @@ class Posts {
 		if (!$data){
 			throw new \NotFoundException();
 		}
+		\Rocket::call(array("ResponseTime", "on_data"), $data);
 		return $data;
 	}
 

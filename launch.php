@@ -19,6 +19,10 @@
  * - handle caching
  * - handle throttling
  * - CSRF
+ * - before & after hooks
+ * * cascading hook logic, apply a trait at api/resource/endpoint/context/request_method level
+ * - global hooks at application level eg. before routing ->launch() method
+ * - resource name collisions
  */
 
 
