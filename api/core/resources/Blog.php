@@ -5,7 +5,7 @@
 
 namespace Resources;
 
-class Blogs extends \Rocket\Api\Resource{
+class Blog extends \Rocket\Api\Resource{
 
 	protected $fields = array("name","description","posts","owner","created","updated");
 	protected static $notExposed = array("");
@@ -17,9 +17,9 @@ class Blogs extends \Rocket\Api\Resource{
 
 	function validate_name($value) {
 		$errors = array();
-		if (!is_string($value)){ $errors[] = "Blogs.name.incorrectType.string"; }
-		if (strlen($value) > 30){ $errors[] = "Blogs.name.tooLong"; }
-		if (strlen($value) < 3){ $errors[] = "Blogs.name.tooShort"; }
+		if (!is_string($value)){ $errors[] = "Blog.name.incorrectType.string"; }
+		if (strlen($value) > 30){ $errors[] = "Blog.name.tooLong"; }
+		if (strlen($value) < 3){ $errors[] = "Blog.name.tooShort"; }
 		return $errors;
 	}
 
@@ -30,8 +30,8 @@ class Blogs extends \Rocket\Api\Resource{
 
 	function validate_description($value) {
 		$errors = array();
-		if (!is_string($value)){ $errors[] = "Blogs.description.incorrectType.string"; }
-		if (strlen($value) > 400){ $errors[] = "Blogs.description.tooLong"; }
+		if (!is_string($value)){ $errors[] = "Blog.description.incorrectType.string"; }
+		if (strlen($value) > 400){ $errors[] = "Blog.description.tooLong"; }
 		return $errors;
 	}
 
@@ -47,7 +47,7 @@ class Blogs extends \Rocket\Api\Resource{
 
 	function posts($id) {
 		// TODO: return query here so that users can customize result eg. LIMIT, ORDER BY, WHERE x, etc
-		$query = "SELECT * FROM Posts WHERE blog_id = :id";
+		$query = "SELECT * FROM Post WHERE blog_id = :id";
 		$statement = $this->db->prepare($query);
 		$statement->execute(array('id' => $id));
 		$data = $statement->fetchAll(\PDO::FETCH_ASSOC);
@@ -84,7 +84,7 @@ class Blogs extends \Rocket\Api\Resource{
 
 	function validate_created($value) {
 		$errors = array();
-		if (!is_date($value, 'Y-m-d H:i:s')){ $errors[] = "Blogs.created.incorrectType.datetime"; }
+		if (!is_date($value, 'Y-m-d H:i:s')){ $errors[] = "Blog.created.incorrectType.datetime"; }
 		return $errors;
 	}
 
@@ -95,7 +95,7 @@ class Blogs extends \Rocket\Api\Resource{
 
 	function validate_updated($value) {
 		$errors = array();
-		if (!is_date($value, 'Y-m-d H:i:s')){ $errors[] = "Blogs.updated.incorrectType.datetime"; }
+		if (!is_date($value, 'Y-m-d H:i:s')){ $errors[] = "Blog.updated.incorrectType.datetime"; }
 		return $errors;
 	}
 
@@ -103,17 +103,13 @@ class Blogs extends \Rocket\Api\Resource{
 		$errors = array();
 
 		\Rocket::call(array("ResponseTime", "on_start"), $data);
-		// check for required input data
-		if (!isset($data["name"])){ $errors[] = "Blogs.name.required"; }
-		else{ $data["name"] = $this->receive_name($data["name"], $errors); }
-
 		if (count($errors)) {
 			throw new \InvalidInputDataException($errors);
 		}
 
 		\Rocket::call(array("TimeTracked", "on_input"), $data);
 		\Rocket::call(array("paginated", "on_input"), $data);
-		$query = "SELECT * FROM Blogs";
+		$query = "SELECT * FROM Blog";
 		\Rocket::call(array("paginated", "on_query"), $query, $data);
 		$statement = $this->db->prepare($query);
 		$statement->execute( $this->getDataForQuery($query, $data) );
@@ -133,14 +129,14 @@ class Blogs extends \Rocket\Api\Resource{
 
 		\Rocket::call(array("TimeTracked", "on_input"), $data);
 		$fields = array_intersect($this->fields, array_keys($data));
-		$query = "INSERT INTO Blogs (".implode(',', $fields).") VALUES (:".implode(', :', $fields).")";
+		$query = "INSERT INTO Blog (".implode(',', $fields).") VALUES (:".implode(', :', $fields).")";
 		$statement = $this->db->prepare($query);
 		$statement->execute( $this->getDataForQuery($query, $data) );
 		$id = $this->db->lastInsertId();
 		if (!$id){
 			throw new \Exception('Could not create resource');
 		}
-		$query = "SELECT * FROM Blogs WHERE id = :id LIMIT 1";
+		$query = "SELECT * FROM Blog WHERE id = :id LIMIT 1";
 		$statement = $this->db->prepare($query);
 		$statement->execute(array("id" => $id));
 		$data = $statement->fetch(\PDO::FETCH_ASSOC);
@@ -162,7 +158,7 @@ class Blogs extends \Rocket\Api\Resource{
 		}
 
 		\Rocket::call(array("TimeTracked", "on_input"), $data);
-		$query = "SELECT * FROM Blogs WHERE id = :id LIMIT 1";
+		$query = "SELECT * FROM Blog WHERE id = :id LIMIT 1";
 		$statement = $this->db->prepare($query);
 		$statement->execute( $this->getDataForQuery($query, $data) );
 		$data = $statement->fetch(\PDO::FETCH_ASSOC);
@@ -189,11 +185,38 @@ class Blogs extends \Rocket\Api\Resource{
 		foreach ($fields as $field){
 			$pairs[] = $field . " = :" . $field;
 		}
-		$query = "UPDATE Blogs SET ".implode(', ', $pairs)." WHERE id = :id";
+		$query = "UPDATE Blog SET ".implode(', ', $pairs)." WHERE id = :id";
 		$statement = $this->db->prepare($query);
 		$result = $statement->execute( $this->getDataForQuery($query, $data) );
+		if ($statement->rowCount() == 0){
+			throw new \NotFoundException();
+		}
 		if (!$result){
 			throw new \Exception('Could not update resource');
+		}
+		\Rocket::call(array("ResponseTime", "on_data"), $data);
+		return $data;
+	}
+
+	function DELETE_blogs_id_when_public($data, $id) {
+		$errors = array();
+
+		$data["id"] = $id;
+
+		\Rocket::call(array("ResponseTime", "on_start"), $data);
+		if (count($errors)) {
+			throw new \InvalidInputDataException($errors);
+		}
+
+		\Rocket::call(array("TimeTracked", "on_input"), $data);
+		$query = "DELETE FROM Blog WHERE id = :id";
+		$statement = $this->db->prepare($query);
+		$result = $statement->execute( $this->getDataForQuery($query, $data) );
+		if ($statement->rowCount() == 0){
+			throw new \NotFoundException();
+		}
+		if (!$result){
+			throw new \Exception('Could not delete resource');
 		}
 		\Rocket::call(array("ResponseTime", "on_data"), $data);
 		return $data;

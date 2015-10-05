@@ -15,6 +15,7 @@
  * - documentator script
  *
  * Roadmap
+ * - tests
  * - yaml
  * - handle caching
  * - handle throttling
@@ -23,7 +24,8 @@
  * * cascading hook logic, apply a trait at api/resource/endpoint/context/request_method level
  * - global hooks at application level eg. before routing ->launch() method
  * - resource name collisions
- * - generate "minimized";
+ * - generate "minimized" and test if performance improves;
+ * - CLI
  */
 
 

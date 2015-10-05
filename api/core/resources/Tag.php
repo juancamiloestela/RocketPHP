@@ -5,7 +5,7 @@
 
 namespace Resources;
 
-class Tags extends \Rocket\Api\Resource{
+class Tag extends \Rocket\Api\Resource{
 
 	protected $fields = array("text","posts");
 	protected static $notExposed = array("");
@@ -17,9 +17,9 @@ class Tags extends \Rocket\Api\Resource{
 
 	function validate_text($value) {
 		$errors = array();
-		if (!is_string($value)){ $errors[] = "Tags.text.incorrectType.string"; }
-		if (strlen($value) > 30){ $errors[] = "Tags.text.tooLong"; }
-		if (strlen($value) < 3){ $errors[] = "Tags.text.tooShort"; }
+		if (!is_string($value)){ $errors[] = "Tag.text.incorrectType.string"; }
+		if (strlen($value) > 30){ $errors[] = "Tag.text.tooLong"; }
+		if (strlen($value) < 3){ $errors[] = "Tag.text.tooShort"; }
 		return $errors;
 	}
 
@@ -35,7 +35,7 @@ class Tags extends \Rocket\Api\Resource{
 
 	function posts($id) {
 		// TODO: return query here so that users can customize result eg. LIMIT, ORDER BY, WHERE x, etc
-		$query = "SELECT Posts.* FROM Posts JOIN posts_tags ON Posts.id = posts_tags.posts_id WHERE posts_tags.tags_id = :id";
+		$query = "SELECT Post.* FROM Post JOIN posts_tags ON Post.id = posts_tags.posts_id WHERE posts_tags.tags_id = :id";
 		$statement = $this->db->prepare($query);
 		$statement->execute(array('id' => $id));
 		$data = $statement->fetchAll(\PDO::FETCH_ASSOC);
@@ -53,7 +53,7 @@ class Tags extends \Rocket\Api\Resource{
 		}
 
 		\Rocket::call(array("paginated", "on_input"), $data);
-		$query = "SELECT * FROM Tags";
+		$query = "SELECT * FROM Tag";
 		\Rocket::call(array("paginated", "on_query"), $query, $data);
 		$statement = $this->db->prepare($query);
 		$statement->execute( $this->getDataForQuery($query, $data) );
@@ -73,7 +73,7 @@ class Tags extends \Rocket\Api\Resource{
 			throw new \InvalidInputDataException($errors);
 		}
 
-		$query = "SELECT * FROM Tags WHERE id = :id LIMIT 1";
+		$query = "SELECT * FROM Tag WHERE id = :id LIMIT 1";
 		$statement = $this->db->prepare($query);
 		$statement->execute( $this->getDataForQuery($query, $data) );
 		$data = $statement->fetch(\PDO::FETCH_ASSOC);
@@ -109,7 +109,7 @@ class Tags extends \Rocket\Api\Resource{
 			throw new \InvalidInputDataException($errors);
 		}
 
-		$query = "SELECT * FROM Tags WHERE id = :id LIMIT 1";
+		$query = "SELECT * FROM Tag WHERE id = :id LIMIT 1";
 		\Rocket::call(array("Tags", "on_query"), $query, $data);
 		$statement = $this->db->prepare($query);
 		$statement->execute( $this->getDataForQuery($query, $data) );

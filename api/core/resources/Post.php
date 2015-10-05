@@ -5,73 +5,73 @@
 
 namespace Resources;
 
-class Blogs extends \Rocket\Api\Resource{
+class Post extends \Rocket\Api\Resource{
 
-	protected $fields = array("name","description","posts","owner","created","updated");
+	protected $fields = array("title","body","blog","tags","created","updated");
 	protected static $notExposed = array("");
 
-	function receive_name($value, &$errors) {
-		$errors = array_merge($errors, $this->validate_name($value));
+	function receive_title($value, &$errors) {
+		$errors = array_merge($errors, $this->validate_title($value));
 		return $value;
 	}
 
-	function validate_name($value) {
+	function validate_title($value) {
 		$errors = array();
-		if (!is_string($value)){ $errors[] = "Blogs.name.incorrectType.string"; }
-		if (strlen($value) > 30){ $errors[] = "Blogs.name.tooLong"; }
-		if (strlen($value) < 3){ $errors[] = "Blogs.name.tooShort"; }
+		if (!is_string($value)){ $errors[] = "Post.title.incorrectType.string"; }
+		if (strlen($value) > 30){ $errors[] = "Post.title.tooLong"; }
+		if (strlen($value) < 3){ $errors[] = "Post.title.tooShort"; }
 		return $errors;
 	}
 
-	function receive_description($value, &$errors) {
-		$errors = array_merge($errors, $this->validate_description($value));
+	function receive_body($value, &$errors) {
+		$errors = array_merge($errors, $this->validate_body($value));
 		return $value;
 	}
 
-	function validate_description($value) {
+	function validate_body($value) {
 		$errors = array();
-		if (!is_string($value)){ $errors[] = "Blogs.description.incorrectType.string"; }
-		if (strlen($value) > 400){ $errors[] = "Blogs.description.tooLong"; }
+		if (!is_string($value)){ $errors[] = "Post.body.incorrectType.string"; }
+		if (strlen($value) > 1000){ $errors[] = "Post.body.tooLong"; }
 		return $errors;
 	}
 
-	function receive_posts($value, &$errors) {
-		$errors = array_merge($errors, $this->validate_posts($value));
+	function receive_blog($value, &$errors) {
+		$errors = array_merge($errors, $this->validate_blog($value));
 		return $value;
 	}
 
-	function validate_posts($value) {
+	function validate_blog($value) {
 		$errors = array();
 		return $errors;
 	}
 
-	function posts($id) {
+	function blog($id) {
 		// TODO: return query here so that users can customize result eg. LIMIT, ORDER BY, WHERE x, etc
-		$query = "SELECT * FROM Posts WHERE blog_id = :id";
+		$query = "SELECT * FROM Blog WHERE id = :id";
 		$statement = $this->db->prepare($query);
 		$statement->execute(array('id' => $id));
-		$data = $statement->fetchAll(\PDO::FETCH_ASSOC);
+		$data = $statement->fetch(\PDO::FETCH_ASSOC);
 		
 		// TODO: $data = customHook($data);
 		return $data;
 	}
 
-	function receive_owner($value, &$errors) {
-		$errors = array_merge($errors, $this->validate_owner($value));
+	function receive_tags($value, &$errors) {
+		$errors = array_merge($errors, $this->validate_tags($value));
 		return $value;
 	}
 
-	function validate_owner($value) {
+	function validate_tags($value) {
 		$errors = array();
 		return $errors;
 	}
 
-	function owner($id) {
+	function tags($id) {
 		// TODO: return query here so that users can customize result eg. LIMIT, ORDER BY, WHERE x, etc
-		$query = "SELECT * FROM User WHERE id = :id";
+		$query = "SELECT Tag.* FROM Tag JOIN posts_tags ON Tag.id = posts_tags.tags_id WHERE posts_tags.posts_id = :id";
 		$statement = $this->db->prepare($query);
 		$statement->execute(array('id' => $id));
-		$data = $statement->fetch(\PDO::FETCH_ASSOC);
+		$data = $statement->fetchAll(\PDO::FETCH_ASSOC);
 		
 		// TODO: $data = customHook($data);
 		return $data;
@@ -84,7 +84,7 @@ class Blogs extends \Rocket\Api\Resource{
 
 	function validate_created($value) {
 		$errors = array();
-		if (!is_date($value, 'Y-m-d H:i:s')){ $errors[] = "Blogs.created.incorrectType.datetime"; }
+		if (!is_date($value, 'Y-m-d H:i:s')){ $errors[] = "Post.created.incorrectType.datetime"; }
 		return $errors;
 	}
 
@@ -95,25 +95,21 @@ class Blogs extends \Rocket\Api\Resource{
 
 	function validate_updated($value) {
 		$errors = array();
-		if (!is_date($value, 'Y-m-d H:i:s')){ $errors[] = "Blogs.updated.incorrectType.datetime"; }
+		if (!is_date($value, 'Y-m-d H:i:s')){ $errors[] = "Post.updated.incorrectType.datetime"; }
 		return $errors;
 	}
 
-	function GET_blogs_when_public($data) {
+	function GET_posts_when_public($data) {
 		$errors = array();
 
 		\Rocket::call(array("ResponseTime", "on_start"), $data);
-		// check for required input data
-		if (!isset($data["name"])){ $errors[] = "Blogs.name.required"; }
-		else{ $data["name"] = $this->receive_name($data["name"], $errors); }
-
 		if (count($errors)) {
 			throw new \InvalidInputDataException($errors);
 		}
 
 		\Rocket::call(array("TimeTracked", "on_input"), $data);
 		\Rocket::call(array("paginated", "on_input"), $data);
-		$query = "SELECT * FROM Blogs";
+		$query = "SELECT * FROM Post";
 		\Rocket::call(array("paginated", "on_query"), $query, $data);
 		$statement = $this->db->prepare($query);
 		$statement->execute( $this->getDataForQuery($query, $data) );
@@ -123,7 +119,7 @@ class Blogs extends \Rocket\Api\Resource{
 		return $data;
 	}
 
-	function POST_blogs_when_public($data) {
+	function POST_posts_when_public($data) {
 		$errors = array();
 
 		\Rocket::call(array("ResponseTime", "on_start"), $data);
@@ -133,14 +129,14 @@ class Blogs extends \Rocket\Api\Resource{
 
 		\Rocket::call(array("TimeTracked", "on_input"), $data);
 		$fields = array_intersect($this->fields, array_keys($data));
-		$query = "INSERT INTO Blogs (".implode(',', $fields).") VALUES (:".implode(', :', $fields).")";
+		$query = "INSERT INTO Post (".implode(',', $fields).") VALUES (:".implode(', :', $fields).")";
 		$statement = $this->db->prepare($query);
 		$statement->execute( $this->getDataForQuery($query, $data) );
 		$id = $this->db->lastInsertId();
 		if (!$id){
 			throw new \Exception('Could not create resource');
 		}
-		$query = "SELECT * FROM Blogs WHERE id = :id LIMIT 1";
+		$query = "SELECT * FROM Post WHERE id = :id LIMIT 1";
 		$statement = $this->db->prepare($query);
 		$statement->execute(array("id" => $id));
 		$data = $statement->fetch(\PDO::FETCH_ASSOC);
@@ -151,7 +147,7 @@ class Blogs extends \Rocket\Api\Resource{
 		return $data;
 	}
 
-	function GET_blogs_id_when_public($data, $id) {
+	function GET_posts_id_when_public($data, $id) {
 		$errors = array();
 
 		$data["id"] = $id;
@@ -162,7 +158,7 @@ class Blogs extends \Rocket\Api\Resource{
 		}
 
 		\Rocket::call(array("TimeTracked", "on_input"), $data);
-		$query = "SELECT * FROM Blogs WHERE id = :id LIMIT 1";
+		$query = "SELECT * FROM Post WHERE id = :id LIMIT 1";
 		$statement = $this->db->prepare($query);
 		$statement->execute( $this->getDataForQuery($query, $data) );
 		$data = $statement->fetch(\PDO::FETCH_ASSOC);
@@ -173,7 +169,7 @@ class Blogs extends \Rocket\Api\Resource{
 		return $data;
 	}
 
-	function PUT_blogs_id_when_public($data, $id) {
+	function PUT_posts_id_when_public($data, $id) {
 		$errors = array();
 
 		$data["id"] = $id;
@@ -189,9 +185,12 @@ class Blogs extends \Rocket\Api\Resource{
 		foreach ($fields as $field){
 			$pairs[] = $field . " = :" . $field;
 		}
-		$query = "UPDATE Blogs SET ".implode(', ', $pairs)." WHERE id = :id";
+		$query = "UPDATE Post SET ".implode(', ', $pairs)." WHERE id = :id";
 		$statement = $this->db->prepare($query);
 		$result = $statement->execute( $this->getDataForQuery($query, $data) );
+		if ($statement->rowCount() == 0){
+			throw new \NotFoundException();
+		}
 		if (!$result){
 			throw new \Exception('Could not update resource');
 		}
@@ -199,7 +198,7 @@ class Blogs extends \Rocket\Api\Resource{
 		return $data;
 	}
 
-	function GET_blogs_id_posts_when_public($data, $id) {
+	function GET_posts_id_blog_when_public($data, $id) {
 		$errors = array();
 
 		$data["id"] = $id;
@@ -210,12 +209,18 @@ class Blogs extends \Rocket\Api\Resource{
 		}
 
 		\Rocket::call(array("TimeTracked", "on_input"), $data);
-		$data = $this->posts($id);
+		$query = "SELECT * FROM Post WHERE id = :id LIMIT 1";
+		$statement = $this->db->prepare($query);
+		$statement->execute( $this->getDataForQuery($query, $data) );
+		$data = $statement->fetch(\PDO::FETCH_ASSOC);
+		if (!$data){
+			throw new \NotFoundException();
+		}
 		\Rocket::call(array("ResponseTime", "on_data"), $data);
 		return $data;
 	}
 
-	function GET_blogs_id_owner_when_public($data, $id) {
+	function GET_posts_id_tags_when_public($data, $id) {
 		$errors = array();
 
 		$data["id"] = $id;
@@ -226,7 +231,30 @@ class Blogs extends \Rocket\Api\Resource{
 		}
 
 		\Rocket::call(array("TimeTracked", "on_input"), $data);
-		$data = $this->owner($id);
+		$data = $this->tags($id);
+		\Rocket::call(array("ResponseTime", "on_data"), $data);
+		return $data;
+	}
+
+	function GET_posts_tagged_tag_when_public($data, $tag) {
+		$errors = array();
+
+		$data["tag"] = $tag;
+
+		\Rocket::call(array("ResponseTime", "on_start"), $data);
+		if (count($errors)) {
+			throw new \InvalidInputDataException($errors);
+		}
+
+		\Rocket::call(array("TimeTracked", "on_input"), $data);
+		$query = "SELECT * FROM Post WHERE id = :id LIMIT 1";
+		\Rocket::call(array("Tags", "on_query"), $query, $data);
+		$statement = $this->db->prepare($query);
+		$statement->execute( $this->getDataForQuery($query, $data) );
+		$data = $statement->fetch(\PDO::FETCH_ASSOC);
+		if (!$data){
+			throw new \NotFoundException();
+		}
 		\Rocket::call(array("ResponseTime", "on_data"), $data);
 		return $data;
 	}

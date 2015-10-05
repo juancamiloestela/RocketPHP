@@ -17,9 +17,9 @@ class User extends \Rocket\Api\Resource{
 
 	function validate_name($value) {
 		$errors = array();
-		if (!is_string($value)){ $errors[] = "name.incorrectType.string"; }
-		if (strlen($value) > 30){ $errors[] = "name.tooLong"; }
-		if (strlen($value) < 3){ $errors[] = "name.tooShort"; }
+		if (!is_string($value)){ $errors[] = "User.name.incorrectType.string"; }
+		if (strlen($value) > 30){ $errors[] = "User.name.tooLong"; }
+		if (strlen($value) < 3){ $errors[] = "User.name.tooShort"; }
 		return $errors;
 	}
 
@@ -30,9 +30,9 @@ class User extends \Rocket\Api\Resource{
 
 	function validate_email($value) {
 		$errors = array();
-		if (!filter_var($value, FILTER_VALIDATE_EMAIL)){ $errors[] = "email.incorrectType.email"; }
-		if (strlen($value) > 30){ $errors[] = "email.tooLong"; }
-		if (strlen($value) < 5){ $errors[] = "email.tooShort"; }
+		if (!filter_var($value, FILTER_VALIDATE_EMAIL)){ $errors[] = "User.email.incorrectType.email"; }
+		if (strlen($value) > 30){ $errors[] = "User.email.tooLong"; }
+		if (strlen($value) < 5){ $errors[] = "User.email.tooShort"; }
 		return $errors;
 	}
 
@@ -43,9 +43,9 @@ class User extends \Rocket\Api\Resource{
 
 	function validate_password($value) {
 		$errors = array();
-		if (!is_string($value)){ $errors[] = "password.incorrectType.string"; }
-		if (strlen($value) > 60){ $errors[] = "password.tooLong"; }
-		if (strlen($value) < 60){ $errors[] = "password.tooShort"; }
+		if (!is_string($value)){ $errors[] = "User.password.incorrectType.string"; }
+		if (strlen($value) > 60){ $errors[] = "User.password.tooLong"; }
+		if (strlen($value) < 60){ $errors[] = "User.password.tooShort"; }
 		return $errors;
 	}
 
@@ -61,7 +61,7 @@ class User extends \Rocket\Api\Resource{
 
 	function blog($id) {
 		// TODO: return query here so that users can customize result eg. LIMIT, ORDER BY, WHERE x, etc
-		$query = "SELECT * FROM Blogs WHERE id = :id";
+		$query = "SELECT * FROM Blog WHERE id = :id";
 		$statement = $this->db->prepare($query);
 		$statement->execute(array('id' => $id));
 		$data = $statement->fetch(\PDO::FETCH_ASSOC);

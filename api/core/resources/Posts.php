@@ -17,9 +17,9 @@ class Posts extends \Rocket\Api\Resource{
 
 	function validate_title($value) {
 		$errors = array();
-		if (!is_string($value)){ $errors[] = "title.incorrectType.string"; }
-		if (strlen($value) > 30){ $errors[] = "title.tooLong"; }
-		if (strlen($value) < 3){ $errors[] = "title.tooShort"; }
+		if (!is_string($value)){ $errors[] = "Posts.title.incorrectType.string"; }
+		if (strlen($value) > 30){ $errors[] = "Posts.title.tooLong"; }
+		if (strlen($value) < 3){ $errors[] = "Posts.title.tooShort"; }
 		return $errors;
 	}
 
@@ -30,8 +30,8 @@ class Posts extends \Rocket\Api\Resource{
 
 	function validate_body($value) {
 		$errors = array();
-		if (!is_string($value)){ $errors[] = "body.incorrectType.string"; }
-		if (strlen($value) > 1000){ $errors[] = "body.tooLong"; }
+		if (!is_string($value)){ $errors[] = "Posts.body.incorrectType.string"; }
+		if (strlen($value) > 1000){ $errors[] = "Posts.body.tooLong"; }
 		return $errors;
 	}
 
@@ -84,7 +84,7 @@ class Posts extends \Rocket\Api\Resource{
 
 	function validate_created($value) {
 		$errors = array();
-		if (!is_date($value, 'Y-m-d H:i:s')){ $errors[] = "created.incorrectType.datetime"; }
+		if (!is_date($value, 'Y-m-d H:i:s')){ $errors[] = "Posts.created.incorrectType.datetime"; }
 		return $errors;
 	}
 
@@ -95,7 +95,7 @@ class Posts extends \Rocket\Api\Resource{
 
 	function validate_updated($value) {
 		$errors = array();
-		if (!is_date($value, 'Y-m-d H:i:s')){ $errors[] = "updated.incorrectType.datetime"; }
+		if (!is_date($value, 'Y-m-d H:i:s')){ $errors[] = "Posts.updated.incorrectType.datetime"; }
 		return $errors;
 	}
 

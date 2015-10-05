@@ -39,7 +39,7 @@
 				"blog": {
 					"type": {
 						"relation": "has-one",
-						"resource": "Blogs",
+						"resource": "Blog",
 						"on": "owner"
 					}
 				}
@@ -62,7 +62,7 @@
 				}
 			}
 		},
-		"Blogs": {
+		"Blog": {
 			"description": "Blog entity",
 			"traits": ["TimeTracked"],
 			"properties": {
@@ -78,7 +78,7 @@
 				"posts": {
 					"type": {
 						"relation": "has-many",
-						"resource": "Posts",
+						"resource": "Post",
 						"on": "blog"
 					}
 				},
@@ -110,6 +110,9 @@
 						},
 						"PUT": {
 							"returns": {}
+						},
+						"DELETE": {
+							"returns": {}
 						}
 					}
 				},
@@ -129,7 +132,7 @@
 				}
 			}
 		},
-		"Posts": {
+		"Post": {
 			"description": "Post entity",
 			"traits": ["TimeTracked"],
 			"properties": {
@@ -145,14 +148,14 @@
 				"blog": {
 					"type": {
 						"relation": "has-one",
-						"resource": "Blogs",
+						"resource": "Blog",
 						"on": "posts"
 					}
 				},
 				"tags": {
 					"type": {
 						"relation": "has-many",
-						"resource": "Tags",
+						"resource": "Tag",
 						"on": "posts"
 					}
 				}
@@ -204,7 +207,7 @@
 				}
 			}
 		},
-		"Tags": {
+		"Tag": {
 			"description": "Tag entity",
 			"properties": {
 				"text": {
@@ -215,7 +218,7 @@
 				"posts": {
 					"type": {
 						"relation": "has-many",
-						"resource": "Posts",
+						"resource": "Post",
 						"on": "tags"
 					}
 				}

@@ -154,7 +154,6 @@ class Generator{
 				echo "\t\t" . "\$errors = array_merge(\$errors, \$this->validate_$propertyName(\$value));" . PHP_EOL;
 				if (isset($property->on_receive)){
 					$on_receive = explode('.', $property->on_receive);
-					// TODO: pass data and errors
 					echo "\t\t" . "\Rocket::call(array(\"$on_receive[0]\", \"$on_receive[1]\"), \$value, \$errors);" . PHP_EOL;
 				}
 				echo "\t\t" . "return \$value;" . PHP_EOL;
@@ -164,50 +163,50 @@ class Generator{
 				echo "\t\t". "\$errors = array();" . PHP_EOL;
 				switch ($property->type){
 					case "string":
-						echo "\t\t" . "if (!is_string(\$value)){ \$errors[] = \"$propertyName.incorrectType.string\"; }" . PHP_EOL;
+						echo "\t\t" . "if (!is_string(\$value)){ \$errors[] = \"$resourceName.$propertyName.incorrectType.string\"; }" . PHP_EOL;
 						break;
 					case "int":
-						echo "\t\t" . "if (!is_int(\$value)){ \$errors[] = \"$propertyName.incorrectType.int\"; }" . PHP_EOL;
+						echo "\t\t" . "if (!is_int(\$value)){ \$errors[] = \"$resourceName.$propertyName.incorrectType.int\"; }" . PHP_EOL;
 						break;
 					case "float":
 					case "double":
-						echo "\t\t" . "if (!is_float(\$value)){ \$errors[] = \"$propertyName.incorrectType.float\"; }" . PHP_EOL;
+						echo "\t\t" . "if (!is_float(\$value)){ \$errors[] = \"$resourceName.$propertyName.incorrectType.float\"; }" . PHP_EOL;
 						break;
 					case "datetime":
-						echo "\t\t" . "if (!is_date(\$value, 'Y-m-d H:i:s')){ \$errors[] = \"$propertyName.incorrectType.datetime\"; }" . PHP_EOL;
+						echo "\t\t" . "if (!is_date(\$value, 'Y-m-d H:i:s')){ \$errors[] = \"$resourceName.$propertyName.incorrectType.datetime\"; }" . PHP_EOL;
 						break;
 					case "date":
-						echo "\t\t" . "if (!is_date(\$value, 'Y-m-d')){ \$errors[] = \"$propertyName.incorrectType.date\"; }" . PHP_EOL;
+						echo "\t\t" . "if (!is_date(\$value, 'Y-m-d')){ \$errors[] = \"$resourceName.$propertyName.incorrectType.date\"; }" . PHP_EOL;
 						break;
 					case "time":
 						// TODO: this can be improved, am/pm? no seconds?
-						echo "\t\t" . "if (!is_date(\$value, 'H:i:s')){ \$errors[] = \"$propertyName.incorrectType.time\"; }" . PHP_EOL;
+						echo "\t\t" . "if (!is_date(\$value, 'H:i:s')){ \$errors[] = \"$resourceName.$propertyName.incorrectType.time\"; }" . PHP_EOL;
 						break;
 					case "email":
-						echo "\t\t" . "if (!filter_var(\$value, FILTER_VALIDATE_EMAIL)){ \$errors[] = \"$propertyName.incorrectType.email\"; }" . PHP_EOL;
+						echo "\t\t" . "if (!filter_var(\$value, FILTER_VALIDATE_EMAIL)){ \$errors[] = \"$resourceName.$propertyName.incorrectType.email\"; }" . PHP_EOL;
 						break;
 				}
 				if (isset($property->max_length)){
-					echo "\t\t" . "if (strlen(\$value) > $property->max_length){ \$errors[] = \"$propertyName.tooLong\"; }" . PHP_EOL;
+					echo "\t\t" . "if (strlen(\$value) > $property->max_length){ \$errors[] = \"$resourceName.$propertyName.tooLong\"; }" . PHP_EOL;
 				}
 				if (isset($property->min_length)){
-					echo "\t\t" . "if (strlen(\$value) < $property->min_length){ \$errors[] = \"$propertyName.tooShort\"; }" . PHP_EOL;
+					echo "\t\t" . "if (strlen(\$value) < $property->min_length){ \$errors[] = \"$resourceName.$propertyName.tooShort\"; }" . PHP_EOL;
 				}
 				if (isset($property->matches)){
-					echo "\t\t" . "if (!preg_match(\"$property->matches\", \$value)){ \$errors[] = \"$propertyName.patternMatch\"; }" . PHP_EOL;
+					echo "\t\t" . "if (!preg_match(\"$property->matches\", \$value)){ \$errors[] = \"$resourceName.$propertyName.patternMatch\"; }" . PHP_EOL;
 				}
 				if (isset($property->max)){
 					if (is_object($property->type)){
-					echo "\t\t" . "if (count(\$value) > $property->max){ \$errors[] = \"$propertyName.tooMany\"; }" . PHP_EOL;
+					echo "\t\t" . "if (count(\$value) > $property->max){ \$errors[] = \"$resourceName.$propertyName.tooMany\"; }" . PHP_EOL;
 					}else{
-					echo "\t\t" . "if (\$value > $property->max){ \$errors[] = \"$propertyName.tooLarge\"; }" . PHP_EOL;
+					echo "\t\t" . "if (\$value > $property->max){ \$errors[] = \"$resourceName.$propertyName.tooLarge\"; }" . PHP_EOL;
 					}
 				}
 				if (isset($property->min)){
 					if (is_object($property->type)){
-					echo "\t\t" . "if (count(\$value) < $property->min){ \$errors[] = \"$propertyName.tooFew\"; }" . PHP_EOL;
+					echo "\t\t" . "if (count(\$value) < $property->min){ \$errors[] = \"$resourceName.$propertyName.tooFew\"; }" . PHP_EOL;
 					}else{
-					echo "\t\t" . "if (\$value < $property->min){ \$errors[] = \"$propertyName.tooSmall\"; }" . PHP_EOL;
+					echo "\t\t" . "if (\$value < $property->min){ \$errors[] = \"$resourceName.$propertyName.tooSmall\"; }" . PHP_EOL;
 					}
 				}
 
@@ -353,7 +352,7 @@ class Generator{
 								echo "\t\t" . "// check for required input data" . PHP_EOL;
 								foreach ($method->expects as $expectedName){
 									$expected = $resource->properties->$expectedName;
-									echo "\t\t" . "if (!isset(\$data[\"$expectedName\"])){ \$errors[] = \"$expectedName.required\"; }" . PHP_EOL;
+									echo "\t\t" . "if (!isset(\$data[\"$expectedName\"])){ \$errors[] = \"$resourceName.$expectedName.required\"; }" . PHP_EOL;
 									echo "\t\t" . "else{ \$data[\"$expectedName\"] = \$this->receive_$expectedName(\$data[\"$expectedName\"], \$errors); }" . PHP_EOL;
 								}
 								echo PHP_EOL;
@@ -378,8 +377,6 @@ class Generator{
 							// TODO: include below logic into trait logic above "control exception trigger"
 							if (isset($method->on_error)){
 								$on_error = explode('.', $method->on_error);
-								// TODO: pass data and errors
-								//echo "\t\t\t" . "\$throwException = \Rocket::call(array(\"$on_error[0]\", \"$on_error[1]\"), \$data, \$errors);" . PHP_EOL;
 								echo "\t\t\t" . "if (\Rocket::call(array(\"$on_error[0]\", \"$on_error[1]\"), \$data, \$errors)){" . PHP_EOL;
 								echo "\t\t\t\t" . "throw new \InvalidInputDataException(\$errors);" . PHP_EOL;
 								echo "\t\t\t" . "}" . PHP_EOL;
@@ -421,7 +418,6 @@ class Generator{
 							}
 							if (isset($method->on_input)){
 								$on_input = explode('.', $method->on_input);
-								// TODO: pass data
 								echo "\t\t" . "\Rocket::call(array(\"$on_input[0]\", \"$on_input[1]\"), \$data);" . PHP_EOL;
 							}
 
@@ -445,11 +441,9 @@ class Generator{
 										}
 										if (isset($method->on_query)){
 											$on_query = explode('.', $method->on_query);
-											// TODO: pass query ref and data
 											echo "\t\t" . "\Rocket::call(array(\"$on_query[0]\", \"$on_query[1]\"), \$query, \$data);" . PHP_EOL;
 										}
 
-										//echo "\t\t" . "\$queryData = \$this->getDataForQuery(\$query, \$data);" . PHP_EOL;
 										echo "\t\t" . "\$statement = \$this->db->prepare(\$query);" . PHP_EOL;
 										echo "\t\t" . "\$statement->execute( \$this->getDataForQuery(\$query, \$data) );" . PHP_EOL;
 										echo "\t\t" . "\$data = \$statement->fetch(\PDO::FETCH_ASSOC);" . PHP_EOL;
@@ -471,15 +465,14 @@ class Generator{
 										}
 										if (isset($method->on_query)){
 											$on_query = explode('.', $method->on_query);
-											// TODO: pass query ref and data
 											echo "\t\t" . "\Rocket::call(array(\"$on_query[0]\", \"$on_query[1]\"), \$query, \$data);" . PHP_EOL;
 										}
-										//echo "\t\t" . "\$queryData = \$this->getDataForQuery(\$query, \$data);" . PHP_EOL;
 										echo "\t\t" . "\$statement = \$this->db->prepare(\$query);" . PHP_EOL;
 										echo "\t\t" . "\$statement->execute( \$this->getDataForQuery(\$query, \$data) );" . PHP_EOL;
 										echo "\t\t" . "\$data = \$statement->fetchAll(\PDO::FETCH_ASSOC);" . PHP_EOL;
 									}
 
+									// TODO: related properties ?
 									if ($returnType == 'relation'){
 										// TODO: handle id...
 										echo "\t\t" . "\$data = \$this->$method->returns(\$id);" . PHP_EOL;
@@ -516,6 +509,7 @@ class Generator{
 									echo "\t\t\t" . "throw new \Exception('Could not create resource');" . PHP_EOL;
 									echo "\t\t" . "}" . PHP_EOL;
 									// TODO: how to better control response here? return Rocket::handle('/resources/id')?
+									// TODO: return complete created resource + 201 status
 								}else if ($methodName == "PUT"){
 									if (isset($method->sql)){
 										echo "\t\t" . "\$query = \"{$method->sql}\";" . PHP_EOL;
@@ -540,9 +534,39 @@ class Generator{
 									}
 									echo "\t\t" . "\$statement = \$this->db->prepare(\$query);" . PHP_EOL;
 									echo "\t\t" . "\$result = \$statement->execute( \$this->getDataForQuery(\$query, \$data) );" . PHP_EOL;
+									echo "\t\t" . "if (\$statement->rowCount() == 0){" . PHP_EOL;
+									echo "\t\t\t" . "throw new \NotFoundException();" . PHP_EOL;
+									echo "\t\t" . "}" . PHP_EOL;
 									echo "\t\t" . "if (!\$result){" . PHP_EOL;
 									echo "\t\t\t" . "throw new \Exception('Could not update resource');" . PHP_EOL;
 									echo "\t\t" . "}" . PHP_EOL;
+									// TODO: return complete updated resource
+								}else if ($methodName == "DELETE"){
+									if (isset($method->sql)){
+										echo "\t\t" . "\$query = \"{$method->sql}\";" . PHP_EOL;
+									}else{
+										echo "\t\t" . "\$query = \"DELETE FROM $resourceName WHERE id = :id\";" . PHP_EOL;
+									}
+									if (isset($method->traits)){
+										foreach ($method->traits as $trait){
+											if (method_exists($trait, 'on_query')){
+												echo "\t\t" . "\Rocket::call(array(\"$trait\", \"on_query\"), \$query, \$data);" . PHP_EOL;
+											}
+										}
+									}
+									if (isset($method->on_query)){
+										$on_query = explode('.', $method->on_query);
+										echo "\t\t" . "\Rocket::call(array(\"$on_query[0]\", \"$on_query[1]\"), \$query, \$data);" . PHP_EOL;
+									}
+									echo "\t\t" . "\$statement = \$this->db->prepare(\$query);" . PHP_EOL;
+									echo "\t\t" . "\$result = \$statement->execute( \$this->getDataForQuery(\$query, \$data) );" . PHP_EOL;
+									echo "\t\t" . "if (\$statement->rowCount() == 0){" . PHP_EOL;
+									echo "\t\t\t" . "throw new \NotFoundException();" . PHP_EOL;
+									echo "\t\t" . "}" . PHP_EOL;
+									echo "\t\t" . "if (!\$result){" . PHP_EOL;
+									echo "\t\t\t" . "throw new \Exception('Could not delete resource');" . PHP_EOL;
+									echo "\t\t" . "}" . PHP_EOL;
+									// TODO: return what?
 								}
 
 								if (isset($method->traits)){
@@ -554,7 +578,6 @@ class Generator{
 								}
 								if (isset($method->on_data)){
 									$on_data = explode('.', $method->on_data);
-									// TODO: pass data
 									echo "\t\t" . "\Rocket::call(array(\"$on_data[0]\", \"$on_data[1]\"), \$data);" . PHP_EOL;
 								}
 
