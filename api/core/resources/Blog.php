@@ -136,13 +136,7 @@ class Blog extends \Rocket\Api\Resource{
 		if (!$id){
 			throw new \Exception('Could not create resource');
 		}
-		$query = "SELECT * FROM Blog WHERE id = :id LIMIT 1";
-		$statement = $this->db->prepare($query);
-		$statement->execute(array("id" => $id));
-		$data = $statement->fetch(\PDO::FETCH_ASSOC);
-		if (!$data){
-			throw new \Exception('Could not create resource');
-		}
+		$data = array("created" => $id);
 		\Rocket::call(array("ResponseTime", "on_data"), $data);
 		return $data;
 	}
@@ -194,6 +188,7 @@ class Blog extends \Rocket\Api\Resource{
 		if (!$result){
 			throw new \Exception('Could not update resource');
 		}
+		$data = array("updated" => $id);
 		\Rocket::call(array("ResponseTime", "on_data"), $data);
 		return $data;
 	}
@@ -218,6 +213,7 @@ class Blog extends \Rocket\Api\Resource{
 		if (!$result){
 			throw new \Exception('Could not delete resource');
 		}
+		$data = array("deleted" => $id);
 		\Rocket::call(array("ResponseTime", "on_data"), $data);
 		return $data;
 	}

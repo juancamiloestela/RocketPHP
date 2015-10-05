@@ -141,12 +141,6 @@ class Request {
 	 */
 	function __construct($config = array()){
 		$this->config = array_merge($this->defaults, $config);
-
-		//$this->setLang($_SERVER['HTTP_ACCEPT_LANGUAGE']);
-		//if ($_GET['lang']){
-		//	override
-		//}
-		// TODO: implement q based language detection
 	}
 
 	function setAppPaths($appPath, $publicPath)
@@ -376,8 +370,27 @@ class Request {
 
 	function lang(){
 		if ($this->lang === null){
-			//'en_US'
-			$this->setLang($this->config['default_lang']);
+			if (isset($_GET['lang'])){
+				$this->setLang($_GET['lang']);
+			}else if (isset($_SERVER['HTTP_ACCEPT_LANGUAGE'])){
+				$langs = explode(',', $_SERVER['HTTP_ACCEPT_LANGUAGE']);
+
+				$accepted = array();
+				foreach ($langs as $lang){
+					$lang = explode(';', $lang);
+					if (!isset($lang[1])){
+						$lang[1] = 1;
+					}else{
+						$lang[1] = str_replace('q=', '', $lang[1]);
+					}
+					$accepted[$lang[1]] = str_replace('-', '_', $lang[0]);
+				}
+				ksort($accepted);
+				$this->setLang(array_pop($accepted));
+			}else{
+				//'en_US'
+				$this->setLang($this->config['default_lang']);
+			}
 		}
 		return $this->lang;
 	}

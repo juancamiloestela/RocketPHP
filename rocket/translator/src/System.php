@@ -29,6 +29,7 @@ class System
 				$lang = $this->config['default_lang'];
 			}
 		}
+
 		$this->lang = $lang;
 		$this->loadTranslation($lang);
 	}

@@ -501,13 +501,16 @@ class Generator{
 									echo "\t\t" . "if (!\$id){" . PHP_EOL;
 									echo "\t\t\t" . "throw new \Exception('Could not create resource');" . PHP_EOL;
 									echo "\t\t" . "}" . PHP_EOL;
-									echo "\t\t" . "\$query = \"SELECT * FROM $resourceName WHERE id = :id LIMIT 1\";" . PHP_EOL;
+									
+									/*echo "\t\t" . "\$query = \"SELECT * FROM $resourceName WHERE id = :id LIMIT 1\";" . PHP_EOL;
 									echo "\t\t" . "\$statement = \$this->db->prepare(\$query);" . PHP_EOL;
 									echo "\t\t" . "\$statement->execute(array(\"id\" => \$id));" . PHP_EOL;
 									echo "\t\t" . "\$data = \$statement->fetch(\PDO::FETCH_ASSOC);" . PHP_EOL;
 									echo "\t\t" . "if (!\$data){" . PHP_EOL;
 									echo "\t\t\t" . "throw new \Exception('Could not create resource');" . PHP_EOL;
-									echo "\t\t" . "}" . PHP_EOL;
+									echo "\t\t" . "}" . PHP_EOL;*/
+
+									echo "\t\t" . "\$data = array(\"created\" => \$id);" . PHP_EOL;
 									// TODO: how to better control response here? return Rocket::handle('/resources/id')?
 									// TODO: return complete created resource + 201 status
 								}else if ($methodName == "PUT"){
@@ -540,7 +543,7 @@ class Generator{
 									echo "\t\t" . "if (!\$result){" . PHP_EOL;
 									echo "\t\t\t" . "throw new \Exception('Could not update resource');" . PHP_EOL;
 									echo "\t\t" . "}" . PHP_EOL;
-									// TODO: return complete updated resource
+									echo "\t\t" . "\$data = array(\"updated\" => \$id);" . PHP_EOL;
 								}else if ($methodName == "DELETE"){
 									if (isset($method->sql)){
 										echo "\t\t" . "\$query = \"{$method->sql}\";" . PHP_EOL;
@@ -566,7 +569,7 @@ class Generator{
 									echo "\t\t" . "if (!\$result){" . PHP_EOL;
 									echo "\t\t\t" . "throw new \Exception('Could not delete resource');" . PHP_EOL;
 									echo "\t\t" . "}" . PHP_EOL;
-									// TODO: return what?
+									echo "\t\t" . "\$data = array(\"deleted\" => \$id);" . PHP_EOL;
 								}
 
 								if (isset($method->traits)){

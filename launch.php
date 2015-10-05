@@ -13,6 +13,11 @@
  * * traits paged, etc
  * * exposed
  * - documentator script
+ * - GET related properties?
+ * - POST/PUT relations?
+ * - complex queries
+ * - multi-tenant trait
+ * - system install? create payload folder
  *
  * Roadmap
  * - tests

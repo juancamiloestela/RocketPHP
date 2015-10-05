@@ -42,7 +42,8 @@ return array(
 		'payload' => 'emails/'
 	),
 	'translator' => array(
-		'payload' => 'lang/'
+		'payload' => 'lang/',
+		'default_lang' => 'en_US'
 	),
 	'user' => array(
 		
