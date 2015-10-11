@@ -6,34 +6,28 @@ include 'Mail.php';
 class System
 {
 
-	protected $template;
 	public $config = array();
 	protected $defaults = array(
-		'payload' => 'emails/'
+		'payload' => false
 	);
 
-	public function __construct($template, $config = array())
+	public function __construct($config = array())
 	{
 		$this->config = array_merge($this->defaults, $config);
-		$this->template = $template;
+
+		$this->checkFolderStructure();
 	}
 
-	public function __invoke($message = false, $alt = false)
+	public function checkFolderStructure()
 	{
-		return $this->make($message, $alt);
-	}
-
-	public function send($mail, $data = array())
-	{
-		$filename = $this->config['payload'] . $mail . '.php';
-		if (!file_exists($filename)){
-			throw new \Exception('Mail file '.$mail.' not found');
+		// TODO: this should happen to all systems, extend?
+		if ($this->config['payload'] && !file_exists($this->config['payload'])){
+			mkdir($this->config['payload'], 0755, true);
 		}
-		include $filename;
 	}
 
 	public function make($message = false, $alt = false){
-		$instance = new Mail();
+		$instance = new Mail($this->config);
 		if ($message){
 			$instance->message($message, $alt);
 		}

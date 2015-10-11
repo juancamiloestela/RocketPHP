@@ -1,0 +1,26 @@
+{
+    "name": "rocket/user-system",
+    "version": "0.1",
+    "homepage": "http://www.mecannical.com",
+    "description": "User system for RocketPHP",
+    "keywords": ["middleware", "user"],
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Juan Camilo Estela",
+            "email": "juancamilo.estela@revolutiondynamics.co",
+            "homepage": "http://www.mecannical.com"
+        }
+    ],
+
+    "require": {
+        "php": ">=5.3.0",
+        "rocket/rocket": "*"
+    },
+
+    "autoload": {
+        "psr-4": {
+            "Rocket\\User\\": "src/"
+        }
+    }
+}

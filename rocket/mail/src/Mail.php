@@ -3,6 +3,7 @@ namespace Rocket\Mail;
 
 class Mail
 {
+	protected $config = array();
 	private $from = false;
 	private $to = array();
 	private $cc = array();
@@ -17,9 +18,9 @@ class Mail
 	private $embedded = array();
 	const CLRF = "\r\n";
 
-	public function __construct()
+	public function __construct($config = array())
 	{
-
+		$this->config = $config;
 	}
 
 	public function from($email, $name = false)
@@ -133,10 +134,10 @@ class Mail
 		return $this;
 	}
 
-	public function send()
+	public function buildMessage()
 	{
 		if (count($this->to) == 0){
-			return false;
+			throw new \Exception('Cannot send email without destinataries');
 		}
 
 		$boundary = 'multipart_boundary_' . time();
@@ -204,6 +205,21 @@ class Mail
 
 		$message[] = '--'.$boundary.'--'; // end the message
 
+		return array($headers, $message);
+	}
+
+	public function sendToFile($name = 'sent.txt')
+	{
+		$message = $this->buildMessage();
+		if (!file_exists($this->config['payload'] . 'sent')){
+			mkdir($this->config['payload'] . 'sent', 0755, true);
+		}
+		return file_put_contents($this->config['payload'] . 'sent' . DIRECTORY_SEPARATOR . $name, print_r($message, true));
+	}
+
+	public function send()
+	{
+		list($headers, $message) = $this->buildMessage();
 		return mail(implode(',', $this->to), $this->subject, implode(self::CLRF, $message), implode(self::CLRF, $headers));
 	}
 }

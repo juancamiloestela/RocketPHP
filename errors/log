@@ -13,3 +13,28 @@
 [05-Oct-2015 00:46:29 UTC] PHP Fatal error:  Class 'Rocket\Api\Resource' not found in /Users/Juank/Sites/ApiGenerator/api/core/resources/Blogs.php on line 8
 [05-Oct-2015 03:00:09 UTC] PHP Parse error:  parse error in /Users/Juank/Sites/ApiGenerator/api/core/resources/Blog.php on line 191
 [05-Oct-2015 03:00:24 UTC] PHP Parse error:  parse error in /Users/Juank/Sites/ApiGenerator/api/core/resources/Blog.php on line 192
+[05-Oct-2015 04:02:46 UTC] PHP Fatal error:  Call to a member function format() on a non-object in /Users/Juank/Sites/ApiGenerator/rocket/user/src/System.php on line 79
+[05-Oct-2015 22:21:28 UTC] PHP Fatal error:  Class name must be a valid object or a string in /Users/Juank/Sites/ApiGenerator/rocket/user/src/System.php on line 182
+[05-Oct-2015 23:36:52 UTC] PHP Fatal error:  Class name must be a valid object or a string in /Users/Juank/Sites/ApiGenerator/rocket/user/src/System.php on line 216
+[05-Oct-2015 23:47:56 UTC] PHP Fatal error:  Call to a member function prepare() on a non-object in /Users/Juank/Sites/ApiGenerator/rocket/user/src/System.php on line 294
+[06-Oct-2015 14:26:24 UTC] PHP Fatal error:  Call to undefined method stdClass::toUnsecureArray() in /Users/Juank/Sites/ApiGenerator/rocket/user/src/System.php on line 278
+[06-Oct-2015 14:51:35 UTC] PHP Fatal error:  Cannot use object of type stdClass as array in /Users/Juank/Sites/ApiGenerator/rocket/rocket/src/Request.php on line 445
+[06-Oct-2015 15:03:51 UTC] PHP Fatal error:  Class 'Rocket\ArrayObject' not found in /Users/Juank/Sites/ApiGenerator/rocket/rocket/src/Request.php on line 404
+[06-Oct-2015 15:29:36 UTC] PHP Fatal error:  Class name must be a valid object or a string in /Users/Juank/Sites/ApiGenerator/rocket/user/src/System.php on line 223
+[06-Oct-2015 15:29:42 UTC] PHP Fatal error:  Class name must be a valid object or a string in /Users/Juank/Sites/ApiGenerator/rocket/user/src/System.php on line 223
+[06-Oct-2015 16:11:44 UTC] PHP Fatal error:  Call to a member function succeeded() on a non-object in /Users/Juank/Sites/ApiGenerator/rocket/user/src/System.php on line 242
+[06-Oct-2015 16:41:46 UTC] PHP Fatal error:  Cannot use object of type stdClass as array in /Users/Juank/Sites/ApiGenerator/rocket/user/src/System.php on line 179
+[06-Oct-2015 17:19:53 UTC] PHP Fatal error:  Cannot use object of type stdClass as array in /Users/Juank/Sites/ApiGenerator/rocket/rocket/src/Request.php on line 445
+[06-Oct-2015 17:20:19 UTC] PHP Fatal error:  Cannot use object of type stdClass as array in /Users/Juank/Sites/ApiGenerator/api/core/resources/User.php on line 288
+[06-Oct-2015 19:48:33 UTC] PHP Parse error:  parse error, expecting `'('' in /Users/Juank/Sites/ApiGenerator/api/core/resources/User.php on line 302
+[06-Oct-2015 19:54:15 UTC] PHP Fatal error:  Cannot use object of type stdClass as array in /Users/Juank/Sites/ApiGenerator/api/core/resources/User.php on line 307
+[06-Oct-2015 19:57:51 UTC] PHP Fatal error:  Cannot use object of type stdClass as array in /Users/Juank/Sites/ApiGenerator/api/overrides/paginated.php on line 14
+[06-Oct-2015 19:58:34 UTC] PHP Fatal error:  Cannot use object of type stdClass as array in /Users/Juank/Sites/ApiGenerator/rocket/api/src/Resource.php on line 19
+[06-Oct-2015 19:59:22 UTC] PHP Fatal error:  Call to undefined method stdClass::exchangeArray() in /Users/Juank/Sites/ApiGenerator/rocket/user/src/System.php on line 194
+[06-Oct-2015 20:36:00 UTC] PHP Fatal error:  Call to a member function succeeded() on a non-object in /Users/Juank/Sites/ApiGenerator/rocket/user/src/System.php on line 305
+[10-Oct-2015 19:52:49 UTC] PHP Fatal error:  Class 'Rocket\Template\System' not found in /Users/Juank/Sites/ApiGenerator/launch.php on line 107
+[10-Oct-2015 19:53:55 UTC] PHP Fatal error:  Cannot use object of type stdClass as array in /Users/Juank/Sites/ApiGenerator/rocket/template/src/System.php on line 84
+[10-Oct-2015 19:55:03 UTC] PHP Fatal error:  Cannot use object of type stdClass as array in /Users/Juank/Sites/ApiGenerator/rocket/template/src/System.php on line 84
+[10-Oct-2015 19:55:39 UTC] PHP Fatal error:  Cannot use object of type stdClass as array in /Users/Juank/Sites/ApiGenerator/rocket/template/src/System.php on line 84
+[10-Oct-2015 20:06:38 UTC] PHP Parse error:  parse error, expecting `')'' in /Users/Juank/Sites/ApiGenerator/api/overrides/User.php on line 20
+[10-Oct-2015 20:55:22 UTC] PHP Fatal error:  Call to undefined method Rocket\Template\TemplateDataObject::toArray() in /Users/Juank/Sites/ApiGenerator/rocket/template/src/System.php on line 105

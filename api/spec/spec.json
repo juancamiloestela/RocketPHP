@@ -4,8 +4,8 @@
 	"version": "v1.0",
 	"contexts": {
 		"public": [],
-		"logged": ["Secure::check"],
-		"owns": ["Secure::check", "Contexts::is_owner", "Contexts::is_admin"]
+		"logged": ["User.is_logged"],
+		"owns": ["User.is_logged", "Contexts.is_owner", "Contexts.is_admin"]
 	},
 	"traitsssss": {
 		"paginated": {
@@ -19,22 +19,12 @@
 	"resources": {
 		"User": {
 			"description": "User entity",
+			"traits": ["\\Rocket\\User\\System"],
 			"properties": {
 				"name": {
 					"type": "string",
 					"max_length": 30,
 					"min_length": 3
-				},
-				"email": {
-					"type": "email",
-					"max_length": 30,
-					"min_length": 5,
-					"unique": true
-				},
-				"password": {
-					"type": "string",
-					"max_length": 60,
-					"min_length": 60
 				},
 				"blog": {
 					"type": {
@@ -45,18 +35,93 @@
 				}
 			},
 			"endpoints":{
+				"/register": {
+					"public": {
+						"POST": {
+							"expects": ["name", "email", "password"],
+							"on_action": "User.register_action",
+							"returns": {}
+						}
+					}
+				},
+				"/login": {
+					"public": {
+						"GET": {
+							"expects": ["email", "password"],
+							"on_action": "User.login_action",
+							"returns": {}
+						}
+					}
+				},
+				"/verify": {
+					"public": {
+						"GET": {
+							"expects": ["email", "code"],
+							"on_action": "User.verify_action",
+							"returns": {}
+						}
+					}
+				},
+				"/renew-verification": {
+					"public": {
+						"GET": {
+							"expects": ["email"],
+							"on_action": "User.renewVerification_action",
+							"returns": {}
+						}
+					}
+				},
+				"/logout": {
+					"public": {
+						"GET": {
+							"on_action": "User.logout_action",
+							"returns": {}
+						}
+					}
+				},
+				"/me": {
+					"public": {
+						"GET": {
+							"on_action": "User.me_action",
+							"returns": {}
+						}
+					}
+				},
+				"/change-password": {
+					"public": {
+						"GET": {
+							"expects": ["oldPassword", "password"],
+							"on_action": "User.changePassword_action",
+							"returns": {}
+						}
+					}
+				},
+				"/reset-password": {
+					"public": {
+						"GET": {
+							"expects": ["oldPassword", "password"],
+							"on_action": "User.changePassword_action",
+							"returns": {}
+						},
+						"POST": {
+							"expects": ["oldPassword", "password"],
+							"on_action": "User.changePassword_action",
+							"returns": {}
+						}
+					}
+				},
 				"/users": {
 					"public": {
 						"GET": {
 							"traits": ["paginated"],
-							"returns": [{"id":"", "name":"", "email":""}]
+							"returns": [{}]
 						}
 					}
 				},
 				"/users/{id}": {
 					"public": {
 						"GET": {
-							"returns": {"id":"", "name":""}
+							"returns": {}
 						}
 					}
 				}

@@ -1,4 +1,12 @@
 <?php return array(
+"\/register" => array("class" => "User", "method" => "_register", "args" => array("")),
+"\/login" => array("class" => "User", "method" => "_login", "args" => array("")),
+"\/verify" => array("class" => "User", "method" => "_verify", "args" => array("")),
+"\/renew-verification" => array("class" => "User", "method" => "_renew_verification", "args" => array("")),
+"\/logout" => array("class" => "User", "method" => "_logout", "args" => array("")),
+"\/me" => array("class" => "User", "method" => "_me", "args" => array("")),
+"\/change-password" => array("class" => "User", "method" => "_change_password", "args" => array("")),
+"\/reset-password" => array("class" => "User", "method" => "_reset_password", "args" => array("")),
 "\/users" => array("class" => "User", "method" => "_users", "args" => array("")),
 "\/blogs" => array("class" => "Blog", "method" => "_blogs", "args" => array("")),
 "\/posts" => array("class" => "Post", "method" => "_posts", "args" => array("")),

@@ -1,12 +1,11 @@
 <?php
 /**
  * TODO
- * - detect lang on request class, accept headers and override lang param
+ * * detect lang on request class, accept headers and override lang param
  * * execute all contexts one time and keep state
  * * cleanup and reorder rocket.php code
  * - debugging global to control if exceptions are propagated or not
  * * build hooks/delegates logic
- * - generator script
  * * sync db
  * - cleanup config/folder structure/composer project
  * * datatypes: date, numbers, float, int, relations
@@ -17,19 +16,20 @@
  * - POST/PUT relations?
  * - complex queries
  * - multi-tenant trait
- * - system install? create payload folder
+ * - clean up request and response classes
+ * * cascading hook logic, apply a trait at api/resource/endpoint/context/request_method level
  *
  * Roadmap
  * - tests
+ * - system install? create payload folder
  * - yaml
  * - handle caching
  * - handle throttling
- * - CSRF
+ * - CSRF + honeypot
  * - before & after hooks
- * * cascading hook logic, apply a trait at api/resource/endpoint/context/request_method level
  * - global hooks at application level eg. before routing ->launch() method
  * - resource name collisions
- * - generate "minimized" and test if performance improves;
+ * - generate "minimized" and test if performance improves
  * - CLI
  */
 
@@ -79,22 +79,25 @@ include 'rocket/database/src/System.php';
 include 'rocket/mail/src/System.php';
 include 'rocket/error/src/System.php';
 include 'rocket/translator/src/System.php';
+include 'rocket/template/src/System.php';
 include 'rocket/api/src/System.php';
+include 'rocket/site/src/System.php';
+include 'rocket/user/src/System.php';
 
-	//error_reporting(E_ALL);
+//error_reporting(E_ALL);
 
-	// timezone
-	date_default_timezone_set('UTC');
-	// Encoding
-	if (function_exists('mb_get_info')){
-		mb_internal_encoding('UTF-8');
-		mb_http_output('UTF-8');
-		mb_http_input('UTF-8');
-		mb_language('uni');
-		mb_regex_encoding('UTF-8');
-	}
-	// CSRF
-	// translation
+// timezone
+date_default_timezone_set('UTC');
+// Encoding
+if (function_exists('mb_get_info')){
+	mb_internal_encoding('UTF-8');
+	mb_http_output('UTF-8');
+	mb_http_input('UTF-8');
+	mb_language('uni');
+	mb_regex_encoding('UTF-8');
+}
+// CSRF
+// translation
 
 $config = Rocket::set('config', $config);
 $request = Rocket::set('request', new \Rocket\Request($config['request']));
@@ -103,7 +106,13 @@ $database = Rocket::set('database', new \Rocket\Database\System($config['databas
 $mail = Rocket::set('mail', new \Rocket\Mail\System($config['mail']));
 $error = Rocket::set('error', new \Rocket\Error\System($config['error']));
 $translator = Rocket::set('translator', new \Rocket\Translator\System($request, $config['translator']));
+$template = Rocket::set('template', new \Rocket\Template\System($config['template']));
 $api = Rocket::set('api', new \Rocket\Api\System($database, $config['api']));
+$site = Rocket::set('site', new \Rocket\Site\System($database, $config['site']));
+$user = Rocket::set('user', new \Rocket\User\System($database, $request, $config['user']));
+
+// user system -> identification system?
+//echo '<pre>';print_r($user);
 
 
 $data = array();

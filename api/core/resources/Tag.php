@@ -57,7 +57,7 @@ class Tag extends \Rocket\Api\Resource{
 		\Rocket::call(array("paginated", "on_query"), $query, $data);
 		$statement = $this->db->prepare($query);
 		$statement->execute( $this->getDataForQuery($query, $data) );
-		$data = $statement->fetchAll(\PDO::FETCH_ASSOC);
+		$data = $statement->fetchAll(\PDO::FETCH_OBJ);
 		\Rocket::call(array("ResponseTime", "on_data"), $data);
 		\Rocket::call(array("paginated", "on_data"), $data);
 		return $data;
@@ -66,7 +66,7 @@ class Tag extends \Rocket\Api\Resource{
 	function GET_tags_id_when_public($data, $id) {
 		$errors = array();
 
-		$data["id"] = $id;
+		$data->id = $id;
 
 		\Rocket::call(array("ResponseTime", "on_start"), $data);
 		if (count($errors)) {
@@ -76,7 +76,7 @@ class Tag extends \Rocket\Api\Resource{
 		$query = "SELECT * FROM Tag WHERE id = :id LIMIT 1";
 		$statement = $this->db->prepare($query);
 		$statement->execute( $this->getDataForQuery($query, $data) );
-		$data = $statement->fetch(\PDO::FETCH_ASSOC);
+		$data = $statement->fetch(\PDO::FETCH_OBJ);
 		if (!$data){
 			throw new \NotFoundException();
 		}
@@ -87,7 +87,7 @@ class Tag extends \Rocket\Api\Resource{
 	function GET_tags_id_posts_when_public($data, $id) {
 		$errors = array();
 
-		$data["id"] = $id;
+		$data->id = $id;
 
 		\Rocket::call(array("ResponseTime", "on_start"), $data);
 		if (count($errors)) {
@@ -102,7 +102,7 @@ class Tag extends \Rocket\Api\Resource{
 	function GET_tagged_tag_when_public($data, $tag) {
 		$errors = array();
 
-		$data["tag"] = $tag;
+		$data->tag = $tag;
 
 		\Rocket::call(array("ResponseTime", "on_start"), $data);
 		if (count($errors)) {
@@ -113,7 +113,7 @@ class Tag extends \Rocket\Api\Resource{
 		\Rocket::call(array("Tags", "on_query"), $query, $data);
 		$statement = $this->db->prepare($query);
 		$statement->execute( $this->getDataForQuery($query, $data) );
-		$data = $statement->fetch(\PDO::FETCH_ASSOC);
+		$data = $statement->fetch(\PDO::FETCH_OBJ);
 		if (!$data){
 			throw new \NotFoundException();
 		}
@@ -124,7 +124,7 @@ class Tag extends \Rocket\Api\Resource{
 	function GET_tagged_tag_posts_when_public($data, $tag) {
 		$errors = array();
 
-		$data["tag"] = $tag;
+		$data->tag = $tag;
 
 		\Rocket::call(array("ResponseTime", "on_start"), $data);
 		if (count($errors)) {

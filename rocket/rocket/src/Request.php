@@ -141,9 +141,10 @@ class Request {
 	 */
 	function __construct($config = array()){
 		$this->config = array_merge($this->defaults, $config);
+		$this->uri();
 	}
 
-	function setAppPaths($appPath, $publicPath)
+	/*function setAppPaths($appPath, $publicPath)
 	{
 		$this->appPath = $appPath;
 		$this->publicPath = $publicPath;
@@ -152,7 +153,7 @@ class Request {
 		$this->pathToRocket = str_replace($this->rootPath, '', $this->appPath);
 		$this->pathToPublic = $this->pathToRocket . str_replace($this->appPath, '', $this->publicPath);
 		$this->urlPathToPublic = str_replace($this->rootPath, '', $this->pathToPublic);
-	}
+	}*/
 
 	/**
 	 * Sets current url
@@ -217,6 +218,7 @@ class Request {
 		}*/
 		$app_root = str_replace($_SERVER['DOCUMENT_ROOT'], '', PUBLIC_PATH);
 		$this->uri = '/' . trim(str_replace($app_root, '', $uri), ' /');
+		define('APP_URL' , $this->rootUrl() . $app_root . '/');
 
 		/*$uri = explode('?', $uri);
 		if (isset($uri[1])){
@@ -401,7 +403,7 @@ class Request {
 	 */
 	function setData($data)
 	{
-		$this->data = $data;
+		$this->data = (object)$data;//new ArrayObject($data, \ArrayObject::ARRAY_AS_PROPS);
 		$_REQUEST = $data;
 	}
 
@@ -442,8 +444,8 @@ class Request {
 		}
 
 		if ($key){
-			if (isset($this->data[$key])){
-				return $this->data[$key];
+			if (isset($this->data->$key)){
+				return $this->data->$key;
 			}else{
 				return null;
 			}

@@ -1,6 +1,7 @@
 <?php
 
 include 'Exceptions.php';
+include 'ArrayObject.php';
 include 'Request.php';
 include 'Response.php';
 

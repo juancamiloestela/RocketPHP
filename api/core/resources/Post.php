@@ -113,7 +113,7 @@ class Post extends \Rocket\Api\Resource{
 		\Rocket::call(array("paginated", "on_query"), $query, $data);
 		$statement = $this->db->prepare($query);
 		$statement->execute( $this->getDataForQuery($query, $data) );
-		$data = $statement->fetchAll(\PDO::FETCH_ASSOC);
+		$data = $statement->fetchAll(\PDO::FETCH_OBJ);
 		\Rocket::call(array("ResponseTime", "on_data"), $data);
 		\Rocket::call(array("paginated", "on_data"), $data);
 		return $data;
@@ -144,7 +144,7 @@ class Post extends \Rocket\Api\Resource{
 	function GET_posts_id_when_public($data, $id) {
 		$errors = array();
 
-		$data["id"] = $id;
+		$data->id = $id;
 
 		\Rocket::call(array("ResponseTime", "on_start"), $data);
 		if (count($errors)) {
@@ -155,7 +155,7 @@ class Post extends \Rocket\Api\Resource{
 		$query = "SELECT * FROM Post WHERE id = :id LIMIT 1";
 		$statement = $this->db->prepare($query);
 		$statement->execute( $this->getDataForQuery($query, $data) );
-		$data = $statement->fetch(\PDO::FETCH_ASSOC);
+		$data = $statement->fetch(\PDO::FETCH_OBJ);
 		if (!$data){
 			throw new \NotFoundException();
 		}
@@ -166,7 +166,7 @@ class Post extends \Rocket\Api\Resource{
 	function PUT_posts_id_when_public($data, $id) {
 		$errors = array();
 
-		$data["id"] = $id;
+		$data->id = $id;
 
 		\Rocket::call(array("ResponseTime", "on_start"), $data);
 		if (count($errors)) {
@@ -196,7 +196,7 @@ class Post extends \Rocket\Api\Resource{
 	function GET_posts_id_blog_when_public($data, $id) {
 		$errors = array();
 
-		$data["id"] = $id;
+		$data->id = $id;
 
 		\Rocket::call(array("ResponseTime", "on_start"), $data);
 		if (count($errors)) {
@@ -207,7 +207,7 @@ class Post extends \Rocket\Api\Resource{
 		$query = "SELECT * FROM Post WHERE id = :id LIMIT 1";
 		$statement = $this->db->prepare($query);
 		$statement->execute( $this->getDataForQuery($query, $data) );
-		$data = $statement->fetch(\PDO::FETCH_ASSOC);
+		$data = $statement->fetch(\PDO::FETCH_OBJ);
 		if (!$data){
 			throw new \NotFoundException();
 		}
@@ -218,7 +218,7 @@ class Post extends \Rocket\Api\Resource{
 	function GET_posts_id_tags_when_public($data, $id) {
 		$errors = array();
 
-		$data["id"] = $id;
+		$data->id = $id;
 
 		\Rocket::call(array("ResponseTime", "on_start"), $data);
 		if (count($errors)) {
@@ -234,7 +234,7 @@ class Post extends \Rocket\Api\Resource{
 	function GET_posts_tagged_tag_when_public($data, $tag) {
 		$errors = array();
 
-		$data["tag"] = $tag;
+		$data->tag = $tag;
 
 		\Rocket::call(array("ResponseTime", "on_start"), $data);
 		if (count($errors)) {
@@ -246,7 +246,7 @@ class Post extends \Rocket\Api\Resource{
 		\Rocket::call(array("Tags", "on_query"), $query, $data);
 		$statement = $this->db->prepare($query);
 		$statement->execute( $this->getDataForQuery($query, $data) );
-		$data = $statement->fetch(\PDO::FETCH_ASSOC);
+		$data = $statement->fetch(\PDO::FETCH_OBJ);
 		if (!$data){
 			throw new \NotFoundException();
 		}

@@ -39,17 +39,23 @@ return array(
 		'log_errors' => true
 	),
 	'mail' => array(
-		'payload' => 'emails/'
+		'payload' => 'mail/'
 	),
 	'translator' => array(
 		'payload' => 'lang/',
 		'default_lang' => 'en_US'
 	),
 	'user' => array(
-		
+		'user_table' => 'User'
+	),
+	'template' => array(
+		'payload' => 'templates/'
 	),
 	'api' => array(
 		'spec_file' => 'spec/spec.json',
 		'ignored_tables' => array('some_table')
+	),
+	'site' => array(
+		'spec_file' => 'spec/spec.json'
 	)
 );

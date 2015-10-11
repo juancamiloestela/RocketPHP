@@ -7,7 +7,7 @@ namespace Resources;
 
 class User extends \Rocket\Api\Resource{
 
-	protected $fields = array("name","email","password","blog");
+	protected $fields = array("name","blog","email","password","public_key","private_key","role","active","verified","verification_code","verification_time","verification_expiration","reset_code","reset_expiration","attempts","last_attempt","last_login","registered_time","last_password_change");
 	protected static $notExposed = array("");
 
 	function receive_name($value, &$errors) {
@@ -20,32 +20,6 @@ class User extends \Rocket\Api\Resource{
 		if (!is_string($value)){ $errors[] = "User.name.incorrectType.string"; }
 		if (strlen($value) > 30){ $errors[] = "User.name.tooLong"; }
 		if (strlen($value) < 3){ $errors[] = "User.name.tooShort"; }
-		return $errors;
-	}
-
-	function receive_email($value, &$errors) {
-		$errors = array_merge($errors, $this->validate_email($value));
-		return $value;
-	}
-
-	function validate_email($value) {
-		$errors = array();
-		if (!filter_var($value, FILTER_VALIDATE_EMAIL)){ $errors[] = "User.email.incorrectType.email"; }
-		if (strlen($value) > 30){ $errors[] = "User.email.tooLong"; }
-		if (strlen($value) < 5){ $errors[] = "User.email.tooShort"; }
-		return $errors;
-	}
-
-	function receive_password($value, &$errors) {
-		$errors = array_merge($errors, $this->validate_password($value));
-		return $value;
-	}
-
-	function validate_password($value) {
-		$errors = array();
-		if (!is_string($value)){ $errors[] = "User.password.incorrectType.string"; }
-		if (strlen($value) > 60){ $errors[] = "User.password.tooLong"; }
-		if (strlen($value) < 60){ $errors[] = "User.password.tooShort"; }
 		return $errors;
 	}
 
@@ -70,6 +44,366 @@ class User extends \Rocket\Api\Resource{
 		return $data;
 	}
 
+	function receive_email($value, &$errors) {
+		$errors = array_merge($errors, $this->validate_email($value));
+		return $value;
+	}
+
+	function validate_email($value) {
+		$errors = array();
+		if (!is_string($value)){ $errors[] = "User.email.incorrectType.string"; }
+		if (strlen($value) > 50){ $errors[] = "User.email.tooLong"; }
+		return $errors;
+	}
+
+	function receive_password($value, &$errors) {
+		$errors = array_merge($errors, $this->validate_password($value));
+		return $value;
+	}
+
+	function validate_password($value) {
+		$errors = array();
+		if (!is_string($value)){ $errors[] = "User.password.incorrectType.string"; }
+		if (strlen($value) < 6){ $errors[] = "User.password.tooShort"; }
+		return $errors;
+	}
+
+	function receive_public_key($value, &$errors) {
+		$errors = array_merge($errors, $this->validate_public_key($value));
+		return $value;
+	}
+
+	function validate_public_key($value) {
+		$errors = array();
+		if (!is_string($value)){ $errors[] = "User.public_key.incorrectType.string"; }
+		if (strlen($value) > 50){ $errors[] = "User.public_key.tooLong"; }
+		return $errors;
+	}
+
+	function receive_private_key($value, &$errors) {
+		$errors = array_merge($errors, $this->validate_private_key($value));
+		return $value;
+	}
+
+	function validate_private_key($value) {
+		$errors = array();
+		if (!is_string($value)){ $errors[] = "User.private_key.incorrectType.string"; }
+		if (strlen($value) > 50){ $errors[] = "User.private_key.tooLong"; }
+		return $errors;
+	}
+
+	function receive_role($value, &$errors) {
+		$errors = array_merge($errors, $this->validate_role($value));
+		return $value;
+	}
+
+	function validate_role($value) {
+		$errors = array();
+		if (!is_string($value)){ $errors[] = "User.role.incorrectType.string"; }
+		if (strlen($value) > 50){ $errors[] = "User.role.tooLong"; }
+		return $errors;
+	}
+
+	function receive_active($value, &$errors) {
+		$errors = array_merge($errors, $this->validate_active($value));
+		return $value;
+	}
+
+	function validate_active($value) {
+		$errors = array();
+		if (!in_array($value, array(true, 1, 'true', 'yes', false, 0, 'false', 'no'))){ $errors[] = "User.active.incorrectType.bool"; }
+		return $errors;
+	}
+
+	function receive_verified($value, &$errors) {
+		$errors = array_merge($errors, $this->validate_verified($value));
+		return $value;
+	}
+
+	function validate_verified($value) {
+		$errors = array();
+		if (!in_array($value, array(true, 1, 'true', 'yes', false, 0, 'false', 'no'))){ $errors[] = "User.verified.incorrectType.bool"; }
+		return $errors;
+	}
+
+	function receive_verification_code($value, &$errors) {
+		$errors = array_merge($errors, $this->validate_verification_code($value));
+		return $value;
+	}
+
+	function validate_verification_code($value) {
+		$errors = array();
+		if (!is_string($value)){ $errors[] = "User.verification_code.incorrectType.string"; }
+		if (strlen($value) > 60){ $errors[] = "User.verification_code.tooLong"; }
+		if (strlen($value) < 60){ $errors[] = "User.verification_code.tooShort"; }
+		return $errors;
+	}
+
+	function receive_verification_time($value, &$errors) {
+		$errors = array_merge($errors, $this->validate_verification_time($value));
+		return $value;
+	}
+
+	function validate_verification_time($value) {
+		$errors = array();
+		if (!is_date($value, 'Y-m-d H:i:s')){ $errors[] = "User.verification_time.incorrectType.datetime"; }
+		return $errors;
+	}
+
+	function receive_verification_expiration($value, &$errors) {
+		$errors = array_merge($errors, $this->validate_verification_expiration($value));
+		return $value;
+	}
+
+	function validate_verification_expiration($value) {
+		$errors = array();
+		if (!is_date($value, 'Y-m-d H:i:s')){ $errors[] = "User.verification_expiration.incorrectType.datetime"; }
+		return $errors;
+	}
+
+	function receive_reset_code($value, &$errors) {
+		$errors = array_merge($errors, $this->validate_reset_code($value));
+		return $value;
+	}
+
+	function validate_reset_code($value) {
+		$errors = array();
+		if (!is_string($value)){ $errors[] = "User.reset_code.incorrectType.string"; }
+		if (strlen($value) > 60){ $errors[] = "User.reset_code.tooLong"; }
+		if (strlen($value) < 60){ $errors[] = "User.reset_code.tooShort"; }
+		return $errors;
+	}
+
+	function receive_reset_expiration($value, &$errors) {
+		$errors = array_merge($errors, $this->validate_reset_expiration($value));
+		return $value;
+	}
+
+	function validate_reset_expiration($value) {
+		$errors = array();
+		if (!is_date($value, 'Y-m-d H:i:s')){ $errors[] = "User.reset_expiration.incorrectType.datetime"; }
+		return $errors;
+	}
+
+	function receive_attempts($value, &$errors) {
+		$errors = array_merge($errors, $this->validate_attempts($value));
+		return $value;
+	}
+
+	function validate_attempts($value) {
+		$errors = array();
+		if (!is_int($value)){ $errors[] = "User.attempts.incorrectType.int"; }
+		return $errors;
+	}
+
+	function receive_last_attempt($value, &$errors) {
+		$errors = array_merge($errors, $this->validate_last_attempt($value));
+		return $value;
+	}
+
+	function validate_last_attempt($value) {
+		$errors = array();
+		if (!is_date($value, 'Y-m-d H:i:s')){ $errors[] = "User.last_attempt.incorrectType.datetime"; }
+		return $errors;
+	}
+
+	function receive_last_login($value, &$errors) {
+		$errors = array_merge($errors, $this->validate_last_login($value));
+		return $value;
+	}
+
+	function validate_last_login($value) {
+		$errors = array();
+		if (!is_date($value, 'Y-m-d H:i:s')){ $errors[] = "User.last_login.incorrectType.datetime"; }
+		return $errors;
+	}
+
+	function receive_registered_time($value, &$errors) {
+		$errors = array_merge($errors, $this->validate_registered_time($value));
+		return $value;
+	}
+
+	function validate_registered_time($value) {
+		$errors = array();
+		if (!is_date($value, 'Y-m-d H:i:s')){ $errors[] = "User.registered_time.incorrectType.datetime"; }
+		return $errors;
+	}
+
+	function receive_last_password_change($value, &$errors) {
+		$errors = array_merge($errors, $this->validate_last_password_change($value));
+		return $value;
+	}
+
+	function validate_last_password_change($value) {
+		$errors = array();
+		if (!is_date($value, 'Y-m-d H:i:s')){ $errors[] = "User.last_password_change.incorrectType.datetime"; }
+		return $errors;
+	}
+
+	function POST_register_when_public($data) {
+		$errors = array();
+
+		\Rocket::call(array("ResponseTime", "on_start"), $data);
+		// check for required input data
+		if (!isset($data->name)){ $errors[] = "User.name.required"; }
+		else{ $data->name = $this->receive_name($data->name, $errors); }
+		if (!isset($data->email)){ $errors[] = "User.email.required"; }
+		else{ $data->email = $this->receive_email($data->email, $errors); }
+		if (!isset($data->password)){ $errors[] = "User.password.required"; }
+		else{ $data->password = $this->receive_password($data->password, $errors); }
+
+		if (count($errors)) {
+			throw new \InvalidInputDataException($errors);
+		}
+
+		$data = \Rocket::call(array("User", "register_action"), $data);
+		\Rocket::call(array("ResponseTime", "on_data"), $data);
+		\Rocket::call(array("\Rocket\User\System", "on_data"), $data);
+		return $data;
+	}
+
+	function GET_login_when_public($data) {
+		$errors = array();
+
+		\Rocket::call(array("ResponseTime", "on_start"), $data);
+		// check for required input data
+		if (!isset($data->email)){ $errors[] = "User.email.required"; }
+		else{ $data->email = $this->receive_email($data->email, $errors); }
+		if (!isset($data->password)){ $errors[] = "User.password.required"; }
+		else{ $data->password = $this->receive_password($data->password, $errors); }
+
+		if (count($errors)) {
+			throw new \InvalidInputDataException($errors);
+		}
+
+		$data = \Rocket::call(array("User", "login_action"), $data);
+		\Rocket::call(array("ResponseTime", "on_data"), $data);
+		\Rocket::call(array("\Rocket\User\System", "on_data"), $data);
+		return $data;
+	}
+
+	function GET_verify_when_public($data) {
+		$errors = array();
+
+		\Rocket::call(array("ResponseTime", "on_start"), $data);
+		// check for required input data
+		if (!isset($data->email)){ $errors[] = "User.email.required"; }
+		else{ $data->email = $this->receive_email($data->email, $errors); }
+		if (!isset($data->code)){ $errors[] = "User.code.required"; }
+
+		if (count($errors)) {
+			throw new \InvalidInputDataException($errors);
+		}
+
+		$data = \Rocket::call(array("User", "verify_action"), $data);
+		\Rocket::call(array("ResponseTime", "on_data"), $data);
+		\Rocket::call(array("\Rocket\User\System", "on_data"), $data);
+		return $data;
+	}
+
+	function GET_renew_verification_when_public($data) {
+		$errors = array();
+
+		\Rocket::call(array("ResponseTime", "on_start"), $data);
+		// check for required input data
+		if (!isset($data->email)){ $errors[] = "User.email.required"; }
+		else{ $data->email = $this->receive_email($data->email, $errors); }
+
+		if (count($errors)) {
+			throw new \InvalidInputDataException($errors);
+		}
+
+		$data = \Rocket::call(array("User", "renewVerification_action"), $data);
+		\Rocket::call(array("ResponseTime", "on_data"), $data);
+		\Rocket::call(array("\Rocket\User\System", "on_data"), $data);
+		return $data;
+	}
+
+	function GET_logout_when_public($data) {
+		$errors = array();
+
+		\Rocket::call(array("ResponseTime", "on_start"), $data);
+		if (count($errors)) {
+			throw new \InvalidInputDataException($errors);
+		}
+
+		$data = \Rocket::call(array("User", "logout_action"), $data);
+		\Rocket::call(array("ResponseTime", "on_data"), $data);
+		\Rocket::call(array("\Rocket\User\System", "on_data"), $data);
+		return $data;
+	}
+
+	function GET_me_when_public($data) {
+		$errors = array();
+
+		\Rocket::call(array("ResponseTime", "on_start"), $data);
+		if (count($errors)) {
+			throw new \InvalidInputDataException($errors);
+		}
+
+		$data = \Rocket::call(array("User", "me_action"), $data);
+		\Rocket::call(array("ResponseTime", "on_data"), $data);
+		\Rocket::call(array("\Rocket\User\System", "on_data"), $data);
+		return $data;
+	}
+
+	function GET_change_password_when_public($data) {
+		$errors = array();
+
+		\Rocket::call(array("ResponseTime", "on_start"), $data);
+		// check for required input data
+		if (!isset($data->oldPassword)){ $errors[] = "User.oldPassword.required"; }
+		if (!isset($data->password)){ $errors[] = "User.password.required"; }
+		else{ $data->password = $this->receive_password($data->password, $errors); }
+
+		if (count($errors)) {
+			throw new \InvalidInputDataException($errors);
+		}
+
+		$data = \Rocket::call(array("User", "changePassword_action"), $data);
+		\Rocket::call(array("ResponseTime", "on_data"), $data);
+		\Rocket::call(array("\Rocket\User\System", "on_data"), $data);
+		return $data;
+	}
+
+	function GET_reset_password_when_public($data) {
+		$errors = array();
+
+		\Rocket::call(array("ResponseTime", "on_start"), $data);
+		// check for required input data
+		if (!isset($data->oldPassword)){ $errors[] = "User.oldPassword.required"; }
+		if (!isset($data->password)){ $errors[] = "User.password.required"; }
+		else{ $data->password = $this->receive_password($data->password, $errors); }
+
+		if (count($errors)) {
+			throw new \InvalidInputDataException($errors);
+		}
+
+		$data = \Rocket::call(array("User", "changePassword_action"), $data);
+		\Rocket::call(array("ResponseTime", "on_data"), $data);
+		\Rocket::call(array("\Rocket\User\System", "on_data"), $data);
+		return $data;
+	}
+
+	function POST_reset_password_when_public($data) {
+		$errors = array();
+
+		\Rocket::call(array("ResponseTime", "on_start"), $data);
+		// check for required input data
+		if (!isset($data->oldPassword)){ $errors[] = "User.oldPassword.required"; }
+		if (!isset($data->password)){ $errors[] = "User.password.required"; }
+		else{ $data->password = $this->receive_password($data->password, $errors); }
+
+		if (count($errors)) {
+			throw new \InvalidInputDataException($errors);
+		}
+
+		$data = \Rocket::call(array("User", "changePassword_action"), $data);
+		\Rocket::call(array("ResponseTime", "on_data"), $data);
+		\Rocket::call(array("\Rocket\User\System", "on_data"), $data);
+		return $data;
+	}
+
 	function GET_users_when_public($data) {
 		$errors = array();
 
@@ -79,12 +413,13 @@ class User extends \Rocket\Api\Resource{
 		}
 
 		\Rocket::call(array("paginated", "on_input"), $data);
-		$query = "SELECT id,name,email FROM User";
+		$query = "SELECT * FROM User";
 		\Rocket::call(array("paginated", "on_query"), $query, $data);
 		$statement = $this->db->prepare($query);
 		$statement->execute( $this->getDataForQuery($query, $data) );
-		$data = $statement->fetchAll(\PDO::FETCH_ASSOC);
+		$data = $statement->fetchAll(\PDO::FETCH_OBJ);
 		\Rocket::call(array("ResponseTime", "on_data"), $data);
+		\Rocket::call(array("\Rocket\User\System", "on_data"), $data);
 		\Rocket::call(array("paginated", "on_data"), $data);
 		return $data;
 	}
@@ -92,21 +427,22 @@ class User extends \Rocket\Api\Resource{
 	function GET_users_id_when_public($data, $id) {
 		$errors = array();
 
-		$data["id"] = $id;
+		$data->id = $id;
 
 		\Rocket::call(array("ResponseTime", "on_start"), $data);
 		if (count($errors)) {
 			throw new \InvalidInputDataException($errors);
 		}
 
-		$query = "SELECT id,name FROM User WHERE id = :id LIMIT 1";
+		$query = "SELECT * FROM User WHERE id = :id LIMIT 1";
 		$statement = $this->db->prepare($query);
 		$statement->execute( $this->getDataForQuery($query, $data) );
-		$data = $statement->fetch(\PDO::FETCH_ASSOC);
+		$data = $statement->fetch(\PDO::FETCH_OBJ);
 		if (!$data){
 			throw new \NotFoundException();
 		}
 		\Rocket::call(array("ResponseTime", "on_data"), $data);
+		\Rocket::call(array("\Rocket\User\System", "on_data"), $data);
 		return $data;
 	}
 

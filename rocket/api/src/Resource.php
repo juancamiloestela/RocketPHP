@@ -16,8 +16,8 @@ class Resource{
 		preg_match_all('/:([a-zA-Z0-9_]+)/im', $query, $matches, PREG_SET_ORDER);
 		if (count($matches)){
 			foreach ($matches as $match){
-				if (isset($data[$match[1]])){
-					$queryData[$match[1]] = $data[$match[1]];
+				if (isset($data->$match[1])){
+					$queryData[$match[1]] = $data->$match[1];
 				}
 			}
 		}

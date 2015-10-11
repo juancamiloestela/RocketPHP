@@ -1,0 +1,1 @@
+<strong><?php if (isset($template)){echo $template;} ?></strong>

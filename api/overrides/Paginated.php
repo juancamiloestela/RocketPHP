@@ -11,8 +11,8 @@ class Paginated{
 
 	static function on_input(&$data, $mail){
 		// ensure values are set
-		$data['offset'] = isset($data['offset']) ? $data['offset'] : 0;
-		$data['length'] = isset($data['length']) ? $data['length'] : 10;
+		$data->offset = isset($data->offset) ? $data->offset : 0;
+		$data->length = isset($data->length) ? $data->length : 10;
 	}
 
 	static function on_query(&$query, $data){

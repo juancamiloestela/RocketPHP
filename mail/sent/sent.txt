@@ -1,0 +1,56 @@
+Array
+(
+    [headers] => Array
+        (
+            [0] => From: RocketPHP Team <no-reply@rocketphp.com>
+            [1] => Reply-To: RocketPHP Team <no-reply@rocketphp.com>
+            [2] => cc: 
+            [3] => Bcc: 
+            [4] => MIME-Version: 1.0
+            [5] => Content-Type: multipart/alternative;boundary="multipart_boundary_1444512250"
+        )
+
+    [message] => Array
+        (
+            [0] => This is a multipart message.
+
+            [1] => --multipart_boundary_1444512250
+            [2] => Content-Type: text/plain; charset=UTF-8
+            [3] => Content-Transfer-Encoding: 8bit
+            [4] => 
+Hola Juan Camilo!
+
+	Welcome to RocketPHP! We have recieved your
+registration but want to keep your data safe. To do this we need you
+to activate your account
+	by clicking on the activate link.
+
+	
+		Activate!
+	
+
+Sincerely,The RocketPHP Team
+
+            [5] => --multipart_boundary_1444512250
+            [6] => Content-Type: text/html; charset=UTF-8
+            [7] => Content-Transfer-Encoding: 8bit
+            [8] => 
+<h1>Hola Juan Camilo!</h1>
+<p>
+	Welcome to RocketPHP! We have recieved
+your registration but want to keep your data safe. To do this we need
+you to activate your account
+	by clicking on the activate link. 
+	<a
+href="http://localhost/ApiGenerator/public/account/verify?email=juancamilo.estela@gmail.com&code=3f7c1372a0c6b6c9357b7785e4f9fd6e"
+style="background-color:#ff6600;color:#fff;border-radius:3px;font-weight:bold;display:inline-block;padding:0.5em;text-decoration:none;">
+		Activate!
+	</a>
+</p>
+<p>Sincerely,<br><strong>The
+RocketPHP Team</strong></p>
+
+            [9] => --multipart_boundary_1444512250--
+        )
+
+)
