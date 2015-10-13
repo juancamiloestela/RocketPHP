@@ -102,6 +102,7 @@ class System
 	}
 
 	protected function exec($compiledFile){
+		//echo '<pre>';print_r($this->data->toArray());die();
 		ob_start();
 		extract($this->data->toArray());
 		$engine = $this;

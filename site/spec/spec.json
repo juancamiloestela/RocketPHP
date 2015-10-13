@@ -1,0 +1,40 @@
+{
+	"name": "Super Cool Site",
+	"baseUrl": "http://app.com/",
+	"version": "v1.0",
+	"traits": ["ResponseTime"],
+	"contexts": {
+		"public": [],
+		"logged": ["User.is_logged"],
+		"owns": ["User.is_logged", "Contexts.is_owner", "Contexts.is_admin"]
+	},
+	"pages": {
+		"/blogs": {
+			"public": {
+				"GET": {
+					"data": {
+						"blogs": "api.GET('/blogs', $data)"
+					},
+					"template": "blogs.php"
+				},
+				"POST": {
+					"template": "blogs.php"
+				}
+			}
+		},
+		"/blogs/{id}": {
+			"public": {
+				"GET": {
+					"expects": ["name"],
+					"data": {
+						"blog": "api.GET('/blogs/{id}', $data)"
+					},
+					"template": "blog.php"
+				},
+				"POST": {
+					"template": "blogs.php"
+				}
+			}
+		}
+	}
+}

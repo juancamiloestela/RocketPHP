@@ -4,7 +4,7 @@
  * This file will give you nightmares, but it works!
  * A major refactor is underway.
  *
- * 
+ *
  */
 
 namespace Rocket\Api;
@@ -146,7 +146,7 @@ class Generator{
 					}
 				}
 			}
-			echo "\t" . "protected static \$notExposed = array(\"".implode('","', $notExposed)."\");" . PHP_EOL; 
+			echo "\t" . "protected static \$notExposed = array(\"".implode('","', $notExposed)."\");" . PHP_EOL;
 			echo  PHP_EOL;
 
 			// Render all validation and reciever methods
@@ -325,7 +325,7 @@ class Generator{
 
 						echo "\t". "function $methodName" . str_replace(array('/', '-'), '_', $routeName) . "_when_$contextName(" . implode(', ', $args) . ") {" . PHP_EOL;
 						$this->routes[$routePattern] = "array(\"class\" => \"$resourceName\", \"method\" => \"" . str_replace(array('/', '-'), '_', $routeName) . "\", \"args\" => array(\"".implode('", "', $argNames)."\"))";
-
+echo "echo '<pre>';print_r(\$data);die();";
 						//echo "\t\t" . "\$data = array();" . PHP_EOL;
 						echo "\t\t" . "\$errors = array();" . PHP_EOL . PHP_EOL;
 
@@ -413,10 +413,59 @@ class Generator{
 								$schema = array();
 							}
 
+
+
+							// Get all fields in resource that are not a relation
+							$fieldList = array();
+							foreach ($resource->properties as $key => $value){
+								if (!is_object($value->type)){
+									$fieldList[$key] = '?';
+								}
+							}
+
+							// Intersect return fields with resource fields 
+							// and translate aliases if specified
+							$excluding = count($schema);
+							foreach ($schema as $key => $value){
+								if ($value){
+									$fieldList[$key] = true;
+									$excluding = false;
+								}else{
+									$fieldList[$key] = false;
+									$excluding = true;
+								}
+							}
+
+							// Define unspecified fields according to exclusion request
+							foreach ($fieldList as $key => $value){
+								if ($value === '?'){
+									$fieldList[$key] = $excluding;
+								}
+							}
+
+							// If return fields exclude, include all fields except excluded
+							// If return fields don't exclude, include only requested
 							$requestedFields = array();
+							foreach ($fieldList as $key => $value){
+								if ($value){
+									$requestedFields[] = $key;
+								}
+							}
+
+							// If requested all fields, abbreviate query
+							if (count($requestedFields) == count($fieldList)){
+								$requestedFields = array('*');
+							}
+
+
+							/*$requestedFields = array();
 							foreach ($schema as $key => $value){
 								if (isset($resource->properties->$key) || $key == 'id'){
-									$requestedFields[] = $key;
+									if ($value){
+										$requestedFields[] = $key;
+									}else{
+
+									}
 								}else{
 									if (DEVELOPING){
 										throw new \Exception('Requested field "'.$key.'" from "'.$resourceName.'" but field does not exist :(');
@@ -425,7 +474,7 @@ class Generator{
 							}
 							if (count($requestedFields) == 0){
 								$requestedFields[] = '*';
-							}
+							}*/
 
 							if (isset($method->traits)){
 								foreach ($method->traits as $trait){
@@ -519,546 +568,7 @@ class Generator{
 									echo "\t\t" . "if (!\$id){" . PHP_EOL;
 									echo "\t\t\t" . "throw new \Exception('Could not create resource');" . PHP_EOL;
 									echo "\t\t" . "}" . PHP_EOL;
-									
-									/*echo "\t\t" . "\$query = \"SELECT * FROM $resourceName WHERE id = :id LIMIT 1\";" . PHP_EOL;
-									echo "\t\t" . "\$statement = \$this->db->prepare(\$query);" . PHP_EOL;
-									echo "\t\t" . "\$statement->execute(array(\"id\" => \$id));" . PHP_EOL;
-									echo "\t\t" . "\$data = \$statement->fetch(\PDO::FETCH_ASSOC);" . PHP_EOL;
-									echo "\t\t" . "if (!\$data){" . PHP_EOL;
-									echo "\t\t\t" . "throw new \Exception('Could not create resource');" . PHP_EOL;
-									echo "\t\t" . "}" . PHP_EOL;*/
 
-									echo "\t\t" . "\$data = array(\"created\" => \$id);" . PHP_EOL;
-									// TODO: how to better control response here? return Rocket::handle('/resources/id')?
-									// TODO: return complete created resource + 201 status
-								}else if ($methodName == "PUT"){
-									if (isset($method->sql)){
-										echo "\t\t" . "\$query = \"{$method->sql}\";" . PHP_EOL;
-									}else{
-										echo "\t\t" . "\$fields = array_intersect(\$this->fields, array_keys(\$data));" . PHP_EOL;
-										echo "\t\t" . "\$pairs = array();" . PHP_EOL;
-										echo "\t\t" . "foreach (\$fields as \$field){" . PHP_EOL;
-										echo "\t\t\t" . "\$pairs[] = \$field . \" = :\" . \$field;" . PHP_EOL;
-										echo "\t\t" . "}" . PHP_EOL;
-										echo "\t\t" . "\$query = \"UPDATE $resourceName SET \".implode(', ', \$pairs).\" WHERE id = :id\";" . PHP_EOL;
-									}
-									if (isset($method->traits)){
-										foreach ($method->traits as $trait){
-											if (method_exists($trait, 'on_query')){
-												echo "\t\t" . "\Rocket::call(array(\"$trait\", \"on_query\"), \$query, \$data);" . PHP_EOL;
-											}
-										}
-									}
-									if (isset($method->on_query)){
-										$on_query = explode('.', $method->on_query);
-										echo "\t\t" . "\Rocket::call(array(\"$on_query[0]\", \"$on_query[1]\"), \$query, \$data);" . PHP_EOL;
-									}
-									echo "\t\t" . "\$statement = \$this->db->prepare(\$query);" . PHP_EOL;
-									echo "\t\t" . "\$result = \$statement->execute( \$this->getDataForQuery(\$query, \$data) );" . PHP_EOL;
-									echo "\t\t" . "if (\$statement->rowCount() == 0){" . PHP_EOL;
-									echo "\t\t\t" . "throw new \NotFoundException();" . PHP_EOL;
-									echo "\t\t" . "}" . PHP_EOL;
-									echo "\t\t" . "if (!\$result){" . PHP_EOL;
-									echo "\t\t\t" . "throw new \Exception('Could not update resource');" . PHP_EOL;
-									echo "\t\t" . "}" . PHP_EOL;
-									echo "\t\t" . "\$data = array(\"updated\" => \$id);" . PHP_EOL;
-								}else if ($methodName == "DELETE"){
-									if (isset($method->sql)){
-										echo "\t\t" . "\$query = \"{$method->sql}\";" . PHP_EOL;
-									}else{
-										echo "\t\t" . "\$query = \"DELETE FROM $resourceName WHERE id = :id\";" . PHP_EOL;
-									}
-									if (isset($method->traits)){
-										foreach ($method->traits as $trait){
-											if (method_exists($trait, 'on_query')){
-												echo "\t\t" . "\Rocket::call(array(\"$trait\", \"on_query\"), \$query, \$data);" . PHP_EOL;
-											}
-										}
-									}
-									if (isset($method->on_query)){
-										$on_query = explode('.', $method->on_query);
-										echo "\t\t" . "\Rocket::call(array(\"$on_query[0]\", \"$on_query[1]\"), \$query, \$data);" . PHP_EOL;
-									}
-									echo "\t\t" . "\$statement = \$this->db->prepare(\$query);" . PHP_EOL;
-									echo "\t\t" . "\$result = \$statement->execute( \$this->getDataForQuery(\$query, \$data) );" . PHP_EOL;
-									echo "\t\t" . "if (\$statement->rowCount() == 0){" . PHP_EOL;
-									echo "\t\t\t" . "throw new \NotFoundException();" . PHP_EOL;
-									echo "\t\t" . "}" . PHP_EOL;
-									echo "\t\t" . "if (!\$result){" . PHP_EOL;
-									echo "\t\t\t" . "throw new \Exception('Could not delete resource');" . PHP_EOL;
-									echo "\t\t" . "}" . PHP_EOL;
-									echo "\t\t" . "\$data = array(\"deleted\" => \$id);" . PHP_EOL;
-								}
-
-								/*if (isset($method->traits)){
-									foreach ($method->traits as $trait){
-										if (method_exists($trait, 'on_data')){
-											echo "\t\t" . "\Rocket::call(array(\"$trait\", \"on_data\"), \$data);" . PHP_EOL;
-										}
-									}
-								}
-								if (isset($method->on_data)){
-									$on_data = explode('.', $method->on_data);
-									echo "\t\t" . "\Rocket::call(array(\"$on_data[0]\", \"$on_data[1]\"), \$data);" . PHP_EOL;
-								}
-
-								echo "\t\t" . "return \$data;" . PHP_EOL;*/
-							}
-
-							if (isset($method->traits)){
-								foreach ($method->traits as $trait){
-									if (method_exists($trait, 'on_data')){
-										echo "\t\t" . "\Rocket::call(array(\"$trait\", \"on_data\"), \$data);" . PHP_EOL;
-									}
-								}
-							}
-							if (isset($method->on_data)){
-								$on_data = explode('.', $method->on_data);
-								echo "\t\t" . "\Rocket::call(array(\"$on_data[0]\", \"$on_data[1]\"), \$data);" . PHP_EOL;
-							}
-
-							echo "\t\t" . "return \$data;" . PHP_EOL;
-						}
-						echo "\t}" . PHP_EOL . PHP_EOL;
-					}
-				}
-			}
-
-			echo "}";
-
-			$src = ob_get_contents();
-			ob_end_clean();
-
-			if (!file_exists($this->system->config['core_path'] . 'resources/')){
-				mkdir($this->system->config['core_path'] . 'resources/', 0755, true);
-			}
-			file_put_contents($this->system->config['core_path'] . 'resources' . DIRECTORY_SEPARATOR . $resourceName . '.php', '<?php ' . PHP_EOL . $src);
-		}
-	}
-
-
-
-
-
-
-
-	public function generateResources2()
-	{
-		$this->routes = array();
-		foreach ($this->specs->resources as $resourceName => $resource){
-			//echo 'generating resources: '.$resourceName . PHP_EOL;
-
-			$parentTraits = array();
-
-			if (isset($this->specs->traits)){
-				$parentTraits = array_merge($parentTraits, $this->specs->traits);
-			}
-
-			if (isset($resource->traits)){
-				$parentTraits = array_merge($parentTraits, $resource->traits);
-				foreach ($resource->traits as $traitName){
-					if (method_exists($traitName, 'on_properties')){
-						\Rocket::call(array($traitName, "on_properties"), $resource->properties);
-					}
-				}
-			}
-
-			ob_start();
-
-			echo "/**" . PHP_EOL;
-			echo " * This class has been autogenerated by RocketPHP" . PHP_EOL;
-			echo " */" . PHP_EOL . PHP_EOL;
-			echo "namespace Resources;" . PHP_EOL . PHP_EOL;
-			echo "class $resourceName extends \Rocket\Api\Resource{" . PHP_EOL . PHP_EOL;
-
-			//echo "\t" . "protected \$db;" . PHP_EOL;
-			echo "\t" . "protected \$fields = array(\"".implode('","', array_keys((array)$resource->properties))."\");" . PHP_EOL;
-			$notExposed = array();
-			foreach ($resource->endpoints as $route => $endpoint){
-				foreach ($endpoint as $contextName => $context){
-					foreach ($context as $methodName => $method){
-						if (isset($method->exposed) && $method->exposed === false){
-							$methodName = strtoupper($methodName);
-							$routeName = str_replace(array('{', '}'), '', $route);
-							$notExposed[] = $methodName . str_replace(array('/', '-'), '_', $routeName) . "_when_$contextName";
-						}
-					}
-				}
-			}
-			echo "\t" . "protected static \$notExposed = array(\"".implode('","', $notExposed)."\");" . PHP_EOL; 
-			echo  PHP_EOL;
-
-			// Render all validation and reciever methods
-			foreach ($resource->properties as $propertyName => $property){
-				echo "\t" . "function receive_$propertyName(\$value, &\$errors) {" . PHP_EOL;
-				echo "\t\t" . "\$errors = array_merge(\$errors, \$this->validate_$propertyName(\$value));" . PHP_EOL;
-				if (isset($property->on_receive)){
-					$on_receive = explode('.', $property->on_receive);
-					echo "\t\t" . "\Rocket::call(array(\"$on_receive[0]\", \"$on_receive[1]\"), \$value, \$errors);" . PHP_EOL;
-				}
-				echo "\t\t" . "return \$value;" . PHP_EOL;
-				echo "\t}" . PHP_EOL . PHP_EOL;
-
-				echo "\t" . "function validate_$propertyName(\$value) {" . PHP_EOL;
-				echo "\t\t". "\$errors = array();" . PHP_EOL;
-				switch ($property->type){
-					case "string":
-						echo "\t\t" . "if (!is_string(\$value)){ \$errors[] = \"$resourceName.$propertyName.incorrectType.string\"; }" . PHP_EOL;
-						break;
-					case "int":
-						echo "\t\t" . "if (!is_int(\$value)){ \$errors[] = \"$resourceName.$propertyName.incorrectType.int\"; }" . PHP_EOL;
-						break;
-					case "float":
-					case "double":
-						echo "\t\t" . "if (!is_float(\$value)){ \$errors[] = \"$resourceName.$propertyName.incorrectType.float\"; }" . PHP_EOL;
-						break;
-					case "datetime":
-						echo "\t\t" . "if (!is_date(\$value, 'Y-m-d H:i:s')){ \$errors[] = \"$resourceName.$propertyName.incorrectType.datetime\"; }" . PHP_EOL;
-						break;
-					case "date":
-						echo "\t\t" . "if (!is_date(\$value, 'Y-m-d')){ \$errors[] = \"$resourceName.$propertyName.incorrectType.date\"; }" . PHP_EOL;
-						break;
-					case "time":
-						// TODO: this can be improved, am/pm? no seconds?
-						echo "\t\t" . "if (!is_date(\$value, 'H:i:s')){ \$errors[] = \"$resourceName.$propertyName.incorrectType.time\"; }" . PHP_EOL;
-						break;
-					case "email":
-						echo "\t\t" . "if (!filter_var(\$value, FILTER_VALIDATE_EMAIL)){ \$errors[] = \"$resourceName.$propertyName.incorrectType.email\"; }" . PHP_EOL;
-						break;
-					case "bool":
-						echo "\t\t" . "if (!in_array(\$value, array(true, 1, 'true', 'yes', false, 0, 'false', 'no'))){ \$errors[] = \"$resourceName.$propertyName.incorrectType.bool\"; }" . PHP_EOL;
-						break;
-				}
-				if (isset($property->max_length)){
-					echo "\t\t" . "if (strlen(\$value) > $property->max_length){ \$errors[] = \"$resourceName.$propertyName.tooLong\"; }" . PHP_EOL;
-				}
-				if (isset($property->min_length)){
-					echo "\t\t" . "if (strlen(\$value) < $property->min_length){ \$errors[] = \"$resourceName.$propertyName.tooShort\"; }" . PHP_EOL;
-				}
-				if (isset($property->matches)){
-					echo "\t\t" . "if (!preg_match(\"$property->matches\", \$value)){ \$errors[] = \"$resourceName.$propertyName.patternMatch\"; }" . PHP_EOL;
-				}
-				if (isset($property->max)){
-					if (is_object($property->type)){
-					echo "\t\t" . "if (count(\$value) > $property->max){ \$errors[] = \"$resourceName.$propertyName.tooMany\"; }" . PHP_EOL;
-					}else{
-					echo "\t\t" . "if (\$value > $property->max){ \$errors[] = \"$resourceName.$propertyName.tooLarge\"; }" . PHP_EOL;
-					}
-				}
-				if (isset($property->min)){
-					if (is_object($property->type)){
-					echo "\t\t" . "if (count(\$value) < $property->min){ \$errors[] = \"$resourceName.$propertyName.tooFew\"; }" . PHP_EOL;
-					}else{
-					echo "\t\t" . "if (\$value < $property->min){ \$errors[] = \"$resourceName.$propertyName.tooSmall\"; }" . PHP_EOL;
-					}
-				}
-
-				echo "\t\t" . "return \$errors;" . PHP_EOL;
-				echo "\t}" . PHP_EOL . PHP_EOL;
-
-				if (is_object($property->type)){
-					echo "\t" . "function $propertyName(\$id) {" . PHP_EOL;
-					echo "\t\t" . "// TODO: return query here so that users can customize result eg. LIMIT, ORDER BY, WHERE x, etc" . PHP_EOL;
-					$target = $this->getResource($property->type->resource);
-					$targetProperty = $target->properties->{$property->type->on};
-
-					if ($property->type->relation == 'has-one'){
-						if ($targetProperty->type->relation == 'has-many'){
-							if (isset($property->type->sql)){
-								echo "\t\t" . "\$query = \"{$property->type->sql}\";" . PHP_EOL;
-							}else{
-								echo "\t\t" . "\$query = \"SELECT * FROM {$property->type->resource} WHERE id = :id\";" . PHP_EOL;
-							}
-							echo "\t\t" . "\$statement = \$this->db->prepare(\$query);" . PHP_EOL;
-							echo "\t\t" . "\$statement->execute(array('id' => \$id));" . PHP_EOL;
-							echo "\t\t" . "\$data = \$statement->fetch(\PDO::FETCH_ASSOC);" . PHP_EOL;
-						}else{
-							$resources = array($property->type->resource, $propertyName);
-							sort($resources);
-							if (isset($property->type->sql)){
-								echo "\t\t" . "\$query = \"{$property->type->sql}\";" . PHP_EOL;
-							}else{
-								echo "\t\t" . "\$query = \"SELECT * FROM $resources[0] WHERE id = :id\";" . PHP_EOL;
-							}
-							echo "\t\t" . "\$statement = \$this->db->prepare(\$query);" . PHP_EOL;
-							echo "\t\t" . "\$statement->execute(array('id' => \$id));" . PHP_EOL;
-							echo "\t\t" . "\$data = \$statement->fetch(\PDO::FETCH_ASSOC);" . PHP_EOL;
-						}
-					}
-
-					if ($property->type->relation == 'has-many'){
-						if ($targetProperty->type->relation == 'has-many'){
-							$resources = array($propertyName, $property->type->on);
-							sort($resources);
-
-							if (isset($property->type->sql)){
-								echo "\t\t" . "\$query = \"{$property->type->sql}\";" . PHP_EOL;
-							}else{
-								echo "\t\t" . "\$query = \"SELECT {$property->type->resource}.* FROM {$property->type->resource} JOIN $resources[0]_$resources[1] ON {$property->type->resource}.id = $resources[0]_$resources[1].{$propertyName}_id WHERE $resources[0]_$resources[1].{$property->type->on}_id = :id\";" . PHP_EOL;
-							}
-							echo "\t\t" . "\$statement = \$this->db->prepare(\$query);" . PHP_EOL;
-							echo "\t\t" . "\$statement->execute(array('id' => \$id));" . PHP_EOL;
-							echo "\t\t" . "\$data = \$statement->fetchAll(\PDO::FETCH_ASSOC);" . PHP_EOL;
-						}else{
-							if (isset($property->type->sql)){
-								echo "\t\t" . "\$query = \"{$property->type->sql}\";" . PHP_EOL;
-							}else{
-								echo "\t\t" . "\$query = \"SELECT * FROM {$property->type->resource} WHERE {$property->type->on}_id = :id\";" . PHP_EOL;
-							}
-							echo "\t\t" . "\$statement = \$this->db->prepare(\$query);" . PHP_EOL;
-							echo "\t\t" . "\$statement->execute(array('id' => \$id));" . PHP_EOL;
-							echo "\t\t" . "\$data = \$statement->fetchAll(\PDO::FETCH_ASSOC);" . PHP_EOL;
-						}
-					}
-					echo "\t\t" . "" . PHP_EOL;
-					echo "\t\t" . "// TODO: \$data = customHook(\$data);" . PHP_EOL;
-					echo "\t\t" . "return \$data;" . PHP_EOL;
-					echo "\t}" . PHP_EOL . PHP_EOL;
-				}
-			}
-
-
-
-
-
-
-
-
-
-
-			// Render all endpoints
-			foreach ($resource->endpoints as $route => $endpoint){
-				preg_match_all('/\{([^\}]+)\}/', $route, $matches, PREG_SET_ORDER);
-				//print_r($matches);
-				$args = array('$data');
-				$argNames = array();
-				$routeName = $route;
-				$routePattern = str_replace('/', '\/', $route);
-				if (count($matches)){
-					$routeName = str_replace(array('{', '}'), '', $route);
-					foreach ($matches as $key => $value){
-						$args[] = '$' . $value[1];
-						$argNames[] = $value[1];
-						$routePattern = str_replace('{'.$value[1].'}', '(?P<'.$value[1].'>[^\/]+)', $routePattern);
-					}
-				}
-
-				foreach ($endpoint as $contextName => $context){
-					if ($contextName == 'traits'){
-						$parentTraits = array_merge($parentTraits, $endpoint->traits);
-						continue;
-					}
-					$contextChecks = $this->specs->contexts->$contextName;
-
-					foreach ($context as $methodName => $method){
-						if ($methodName == 'traits'){
-							$parentTraits = array_merge($parentTraits, $context->traits);
-							continue;
-						}
-						$methodName = strtoupper($methodName);
-
-						if (!isset($method->traits)){
-							$method->traits = array();
-						}
-						$method->traits = array_unique(array_merge($parentTraits, $method->traits));
-
-						echo "\t". "function $methodName" . str_replace(array('/', '-'), '_', $routeName) . "_when_$contextName(" . implode(', ', $args) . ") {" . PHP_EOL;
-						$this->routes[$routePattern] = "array(\"class\" => \"$resourceName\", \"method\" => \"" . str_replace(array('/', '-'), '_', $routeName) . "\", \"args\" => array(\"".implode('", "', $argNames)."\"))";
-
-						//echo "\t\t" . "\$data = array();" . PHP_EOL;
-						echo "\t\t" . "\$errors = array();" . PHP_EOL . PHP_EOL;
-
-						$echoed = false;
-						foreach ($args as $argName){
-							if ($argName != '$data'){
-								$echoed = true;
-								echo "\t\t" . "\$data->".trim($argName, '$')." = $argName;" . PHP_EOL;
-							}
-						}
-						if ($echoed){
-							echo PHP_EOL;
-						}
-
-						if (isset($method->traits)){
-							foreach ($method->traits as $trait){
-								if (method_exists($trait, 'on_start')){
-									echo "\t\t" . "\Rocket::call(array(\"$trait\", \"on_start\"), \$data);" . PHP_EOL;
-								}
-							}
-						}
-
-						if (isset($method->delegate)){
-							$delegate = explode('.', $method->delegate);
-							echo "\t\t" . "return \Rocket::call(array(\"$delegate[0]\", \"$delegate[1]\"), \$data);" . PHP_EOL;
-						}else{
-
-							/*if (isset($method->queryParams)){
-								echo "\t\t" . "// check query string data" . PHP_EOL;
-								foreach ($method->queryParams as $paramName => $param){
-									//echo "\t\t" . "\$$paramName = \$this->receive_$paramName(\$_GET[\"$paramName\"], \$errors);" . PHP_EOL;
-								}
-								echo PHP_EOL;
-							}*/
-
-							if (isset($method->expects)){
-								echo "\t\t" . "// check for required input data" . PHP_EOL;
-								foreach ($method->expects as $expectedName){
-									if (isset($resource->properties->$expectedName)){
-										$expected = $resource->properties->$expectedName;
-										echo "\t\t" . "if (!isset(\$data->$expectedName)){ \$errors[] = \"$resourceName.$expectedName.required\"; }" . PHP_EOL;
-										echo "\t\t" . "else{ \$data->$expectedName = \$this->receive_$expectedName(\$data->$expectedName, \$errors); }" . PHP_EOL;
-									}else{
-										// allow making virtual (non resource data) inputs required
-										echo "\t\t" . "if (!isset(\$data->$expectedName)){ \$errors[] = \"$resourceName.$expectedName.required\"; }" . PHP_EOL;
-									}
-								}
-								echo PHP_EOL;
-							}
-
-							if (isset($method->accepts)){
-								echo "\t\t" . "// check optional input data if present" . PHP_EOL;
-								foreach ($method->accepts as $acceptedName){
-									echo "\t\t" . "if (isset(\$data->$acceptedName)){ \$data->$acceptedName = \$this->receive_$acceptedName(\$data->$acceptedName, \$errors); }" . PHP_EOL;
-								}
-								echo PHP_EOL;
-							}
-
-							echo "\t\t" . 'if (count($errors)) {' . PHP_EOL;
-							if (isset($method->traits)){
-								foreach ($method->traits as $trait){
-									if (method_exists($trait, 'on_error')){
-										echo "\t\t" . "\Rocket::call(array(\"$trait\", \"on_error\"), \$data, \$errors);" . PHP_EOL;
-									}
-								}
-							}
-							// TODO: include below logic into trait logic above "control exception trigger"
-							if (isset($method->on_error)){
-								$on_error = explode('.', $method->on_error);
-								echo "\t\t\t" . "if (\Rocket::call(array(\"$on_error[0]\", \"$on_error[1]\"), \$data, \$errors)){" . PHP_EOL;
-								echo "\t\t\t\t" . "throw new \InvalidInputDataException(\$errors);" . PHP_EOL;
-								echo "\t\t\t" . "}" . PHP_EOL;
-							}else{
-								echo "\t\t\t" . "throw new \InvalidInputDataException(\$errors);" . PHP_EOL;
-							}
-							echo "\t\t" . '}' . PHP_EOL . PHP_EOL;
-
-							$returnType = 'object';
-							$schema = $method->returns;
-							if (is_array($method->returns)){
-								$returnType = 'collection';
-								$schema = $method->returns[0];
-							}else if (is_string($method->returns)){
-								$returnType = 'relation';
-								$schema = array();
-							}
-
-							$requestedFields = array();
-							foreach ($schema as $key => $value){
-								if (isset($resource->properties->$key) || $key == 'id'){
-									$requestedFields[] = $key;
-								}else{
-									if (DEVELOPING){
-										throw new \Exception('Requested field "'.$key.'" from "'.$resourceName.'" but field does not exist :(');
-									}
-								}
-							}
-							if (count($requestedFields) == 0){
-								$requestedFields[] = '*';
-							}
-
-							if (isset($method->traits)){
-								foreach ($method->traits as $trait){
-									if (method_exists($trait, 'on_input')){
-										echo "\t\t" . "\Rocket::call(array(\"$trait\", \"on_input\"), \$data);" . PHP_EOL;
-									}
-								}
-							}
-							if (isset($method->on_input)){
-								$on_input = explode('.', $method->on_input);
-								echo "\t\t" . "\Rocket::call(array(\"$on_input[0]\", \"$on_input[1]\"), \$data);" . PHP_EOL;
-							}
-
-							if (isset($method->on_action)){
-								$on_action = explode('.', $method->on_action);
-								echo "\t\t" . "\$data = \Rocket::call(array(\"$on_action[0]\", \"$on_action[1]\"), \$data);" . PHP_EOL;
-							}else{
-								if ($methodName == "GET"){
-									if ($returnType == 'object'){
-										if (isset($method->sql)){
-											echo "\t\t" . "\$query = \"{$method->sql}\";" . PHP_EOL;
-										}else{
-											echo "\t\t" . "\$query = \"SELECT ".implode(',', $requestedFields)." FROM $resourceName WHERE id = :id LIMIT 1\";" . PHP_EOL;
-										}
-										if (isset($method->traits)){
-											foreach ($method->traits as $trait){
-												if (method_exists($trait, 'on_query')){
-													echo "\t\t" . "\Rocket::call(array(\"$trait\", \"on_query\"), \$query, \$data);" . PHP_EOL;
-												}
-											}
-										}
-										if (isset($method->on_query)){
-											$on_query = explode('.', $method->on_query);
-											echo "\t\t" . "\Rocket::call(array(\"$on_query[0]\", \"$on_query[1]\"), \$query, \$data);" . PHP_EOL;
-										}
-
-										echo "\t\t" . "\$statement = \$this->db->prepare(\$query);" . PHP_EOL;
-										echo "\t\t" . "\$statement->execute( \$this->getDataForQuery(\$query, \$data) );" . PHP_EOL;
-										echo "\t\t" . "\$data = \$statement->fetch(\PDO::FETCH_OBJ);" . PHP_EOL;
-										echo "\t\t" . "if (!\$data){" . PHP_EOL;
-										echo "\t\t\t" . "throw new \NotFoundException();" . PHP_EOL;
-										echo "\t\t" . "}" . PHP_EOL;
-									}else if ($returnType == 'collection'){
-										if (isset($method->sql)){
-											echo "\t\t" . "\$query = \"{$method->sql}\";" . PHP_EOL;
-										}else{
-											echo "\t\t" . "\$query = \"SELECT ".implode(',', $requestedFields)." FROM $resourceName\";" . PHP_EOL;
-										}
-										if (isset($method->traits)){
-											foreach ($method->traits as $trait){
-												if (method_exists($trait, 'on_query')){
-													echo "\t\t" . "\Rocket::call(array(\"$trait\", \"on_query\"), \$query, \$data);" . PHP_EOL;
-												}
-											}
-										}
-										if (isset($method->on_query)){
-											$on_query = explode('.', $method->on_query);
-											echo "\t\t" . "\Rocket::call(array(\"$on_query[0]\", \"$on_query[1]\"), \$query, \$data);" . PHP_EOL;
-										}
-										echo "\t\t" . "\$statement = \$this->db->prepare(\$query);" . PHP_EOL;
-										echo "\t\t" . "\$statement->execute( \$this->getDataForQuery(\$query, \$data) );" . PHP_EOL;
-										echo "\t\t" . "\$data = \$statement->fetchAll(\PDO::FETCH_OBJ);" . PHP_EOL;
-									}
-
-									// TODO: related properties ?
-									if ($returnType == 'relation'){
-										// TODO: handle id...
-										echo "\t\t" . "\$data = \$this->$method->returns(\$id);" . PHP_EOL;
-									}
-								}else if ($methodName == "POST"){
-									if (isset($method->sql)){
-										echo "\t\t" . "\$query = \"{$method->sql}\";" . PHP_EOL;
-									}else{
-										echo "\t\t" . "\$fields = array_intersect(\$this->fields, array_keys(\$data));" . PHP_EOL;
-										echo "\t\t" . "\$query = \"INSERT INTO $resourceName (\".implode(',', \$fields).\") VALUES (:\".implode(', :', \$fields).\")\";" . PHP_EOL;
-									}
-									if (isset($method->traits)){
-										foreach ($method->traits as $trait){
-											if (method_exists($trait, 'on_query')){
-												echo "\t\t" . "\Rocket::call(array(\"$trait\", \"on_query\"), \$query, \$data);" . PHP_EOL;
-											}
-										}
-									}
-									if (isset($method->on_query)){
-										$on_query = explode('.', $method->on_query);
-										echo "\t\t" . "\Rocket::call(array(\"$on_query[0]\", \"$on_query[1]\"), \$query, \$data);" . PHP_EOL;
-									}
-									echo "\t\t" . "\$statement = \$this->db->prepare(\$query);" . PHP_EOL;
-									echo "\t\t" . "\$statement->execute( \$this->getDataForQuery(\$query, \$data) );" . PHP_EOL;
-									echo "\t\t" . "\$id = \$this->db->lastInsertId();" . PHP_EOL;
-									echo "\t\t" . "if (!\$id){" . PHP_EOL;
-									echo "\t\t\t" . "throw new \Exception('Could not create resource');" . PHP_EOL;
-									echo "\t\t" . "}" . PHP_EOL;
-									
 									/*echo "\t\t" . "\$query = \"SELECT * FROM $resourceName WHERE id = :id LIMIT 1\";" . PHP_EOL;
 									echo "\t\t" . "\$statement = \$this->db->prepare(\$query);" . PHP_EOL;
 									echo "\t\t" . "\$statement->execute(array(\"id\" => \$id));" . PHP_EOL;
@@ -1273,7 +783,7 @@ class Generator{
 				}
 
 				if ($value->type->relation == 'has-many'){
-					
+
 					if ($targetProperty->type->relation == 'has-many'){
 						$resources = array($key, $value->type->on);
 						sort($resources);
@@ -1529,7 +1039,7 @@ class Generator{
 //echo '<pre>';print_r($d);echo '</pre>';
 
 		$targetSchema = array();
-		
+
 		// loop over model required tables
 		foreach ($m as $mTable){
 			// loop over each field in the table specified by the model

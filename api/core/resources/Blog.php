@@ -100,7 +100,7 @@ class Blog extends \Rocket\Api\Resource{
 	}
 
 	function GET_blogs_when_public($data) {
-		$errors = array();
+echo '<pre>';print_r($data);die();		$errors = array();
 
 		\Rocket::call(array("ResponseTime", "on_start"), $data);
 		if (count($errors)) {
@@ -120,7 +120,7 @@ class Blog extends \Rocket\Api\Resource{
 	}
 
 	function POST_blogs_when_public($data) {
-		$errors = array();
+echo '<pre>';print_r($data);die();		$errors = array();
 
 		\Rocket::call(array("ResponseTime", "on_start"), $data);
 		if (count($errors)) {
@@ -142,7 +142,7 @@ class Blog extends \Rocket\Api\Resource{
 	}
 
 	function GET_blogs_id_when_public($data, $id) {
-		$errors = array();
+echo '<pre>';print_r($data);die();		$errors = array();
 
 		$data->id = $id;
 
@@ -164,7 +164,7 @@ class Blog extends \Rocket\Api\Resource{
 	}
 
 	function PUT_blogs_id_when_public($data, $id) {
-		$errors = array();
+echo '<pre>';print_r($data);die();		$errors = array();
 
 		$data->id = $id;
 
@@ -194,7 +194,7 @@ class Blog extends \Rocket\Api\Resource{
 	}
 
 	function DELETE_blogs_id_when_public($data, $id) {
-		$errors = array();
+echo '<pre>';print_r($data);die();		$errors = array();
 
 		$data->id = $id;
 
@@ -219,7 +219,7 @@ class Blog extends \Rocket\Api\Resource{
 	}
 
 	function GET_blogs_id_posts_when_public($data, $id) {
-		$errors = array();
+echo '<pre>';print_r($data);die();		$errors = array();
 
 		$data->id = $id;
 
@@ -235,7 +235,7 @@ class Blog extends \Rocket\Api\Resource{
 	}
 
 	function GET_blogs_id_owner_when_public($data, $id) {
-		$errors = array();
+echo '<pre>';print_r($data);die();		$errors = array();
 
 		$data->id = $id;
 

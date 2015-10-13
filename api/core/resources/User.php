@@ -241,7 +241,7 @@ class User extends \Rocket\Api\Resource{
 	}
 
 	function POST_register_when_public($data) {
-		$errors = array();
+echo '<pre>';print_r($data);die();		$errors = array();
 
 		\Rocket::call(array("ResponseTime", "on_start"), $data);
 		// check for required input data
@@ -263,7 +263,7 @@ class User extends \Rocket\Api\Resource{
 	}
 
 	function GET_login_when_public($data) {
-		$errors = array();
+echo '<pre>';print_r($data);die();		$errors = array();
 
 		\Rocket::call(array("ResponseTime", "on_start"), $data);
 		// check for required input data
@@ -283,7 +283,7 @@ class User extends \Rocket\Api\Resource{
 	}
 
 	function GET_verify_when_public($data) {
-		$errors = array();
+echo '<pre>';print_r($data);die();		$errors = array();
 
 		\Rocket::call(array("ResponseTime", "on_start"), $data);
 		// check for required input data
@@ -302,7 +302,7 @@ class User extends \Rocket\Api\Resource{
 	}
 
 	function GET_renew_verification_when_public($data) {
-		$errors = array();
+echo '<pre>';print_r($data);die();		$errors = array();
 
 		\Rocket::call(array("ResponseTime", "on_start"), $data);
 		// check for required input data
@@ -320,7 +320,7 @@ class User extends \Rocket\Api\Resource{
 	}
 
 	function GET_logout_when_public($data) {
-		$errors = array();
+echo '<pre>';print_r($data);die();		$errors = array();
 
 		\Rocket::call(array("ResponseTime", "on_start"), $data);
 		if (count($errors)) {
@@ -334,7 +334,7 @@ class User extends \Rocket\Api\Resource{
 	}
 
 	function GET_me_when_public($data) {
-		$errors = array();
+echo '<pre>';print_r($data);die();		$errors = array();
 
 		\Rocket::call(array("ResponseTime", "on_start"), $data);
 		if (count($errors)) {
@@ -348,7 +348,7 @@ class User extends \Rocket\Api\Resource{
 	}
 
 	function GET_change_password_when_public($data) {
-		$errors = array();
+echo '<pre>';print_r($data);die();		$errors = array();
 
 		\Rocket::call(array("ResponseTime", "on_start"), $data);
 		// check for required input data
@@ -367,7 +367,7 @@ class User extends \Rocket\Api\Resource{
 	}
 
 	function GET_reset_password_when_public($data) {
-		$errors = array();
+echo '<pre>';print_r($data);die();		$errors = array();
 
 		\Rocket::call(array("ResponseTime", "on_start"), $data);
 		// check for required input data
@@ -386,7 +386,7 @@ class User extends \Rocket\Api\Resource{
 	}
 
 	function POST_reset_password_when_public($data) {
-		$errors = array();
+echo '<pre>';print_r($data);die();		$errors = array();
 
 		\Rocket::call(array("ResponseTime", "on_start"), $data);
 		// check for required input data
@@ -405,7 +405,7 @@ class User extends \Rocket\Api\Resource{
 	}
 
 	function GET_users_when_public($data) {
-		$errors = array();
+echo '<pre>';print_r($data);die();		$errors = array();
 
 		\Rocket::call(array("ResponseTime", "on_start"), $data);
 		if (count($errors)) {
@@ -425,7 +425,7 @@ class User extends \Rocket\Api\Resource{
 	}
 
 	function GET_users_id_when_public($data, $id) {
-		$errors = array();
+echo '<pre>';print_r($data);die();		$errors = array();
 
 		$data->id = $id;
 

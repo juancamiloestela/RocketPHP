@@ -7,6 +7,7 @@ include 'Resource.php';
 class System
 {
 	public $db;
+	public $response;
 	public $config = array();
 	protected $defaults = array(
 		'payload' => 'api/',
@@ -22,10 +23,11 @@ class System
 	protected $checks = array();
 
 
-	public function __construct($db, $config = array())
+	public function __construct($db, $response, $config = array())
 	{
 		$this->config = array_merge($this->defaults, $config);
 		$this->db = $db;
+		$this->response = $response;
 
 		$this->checkFolderStructure();
 		spl_autoload_register(array($this, 'autoload'));
@@ -110,9 +112,24 @@ class System
 		return false;
 	}
 
-	public function launch($uri, $request_method, $data = array(), $internal = false)
-	{
+	public function GET($uri, $data){
+		return $this->call($uri, 'GET', $data);
+	}
 
+	public function POST($uri, $data){
+		return $this->call($uri, 'POST', $data);
+	}
+
+	public function PUT($uri, $data){
+		return $this->call($uri, 'PUT', $data);
+	}
+
+	public function DELETE($uri, $data){
+		return $this->call($uri, 'DELETE', $data);
+	}
+
+	public function call($uri, $request_method, $data = array(), $internal = true)
+	{
 		foreach ($this->routes as $route => $controller){
 //echo $uri . ' ' . $route . PHP_EOL;
 			if (preg_match('/^'.$route.'$/', $uri, $matches)){
@@ -132,13 +149,87 @@ class System
 					if ($internal || $instance::methodIsExposed($method)){
 						// allow hooks to access current controller
 						\Rocket::set('controller', $instance);
-						return call_user_func_array(array($instance, $method), $args);
+
+						$data = new \stdClass();
+
+						$data->code = 200;
+						$data->data = call_user_func_array(array($instance, $method), $args);
+
+						/*try{
+							$data->code = 200;
+							$data->data = call_user_func_array(array($instance, $method), $args);
+						}catch (\NotFoundException $e){
+							$data->code = 404;
+							$data->errors = "not.found";
+						}catch (\InvalidInputDataException $e){
+							$data->code = 400;
+							$data->errors = $e->errors();
+						}catch (\UnauthorizedException $e){
+							$data->code = 401;
+							$data->errors = $e->data();
+						}catch (\PDOException $e){
+							$data->code = 500;
+							$data->errors = "database.error";
+							print_r($e->getMessage());
+						}catch (\Exception $e){
+							if (true){ // debugging
+								// let the error system handle it
+								throw $e;
+							}else{
+								$data->code = 500;
+								$data->errors = $e->getMessage();
+							}
+						}*/
+
+						$metadata = $this->response->getMetadata(); // TODO: get metadata here
+						foreach ($metadata as $key => $value){
+							$data->$key = $value;
+						}
+
+						return $data;
 					}
 				}
 				break;
 			}
 		}
 		throw new \NotFoundException();
+	}
+
+	public function launch($uri, $request_method, $data = array())
+	{
+		try{
+			$data = $this->call($uri, $request_method, $data, false);
+		}catch (\NotFoundException $e){
+			$data->code = 404;
+			$data->errors = "not.found";
+		}catch (\InvalidInputDataException $e){
+			$data->code = 400;
+			$data->errors = $e->errors();
+		}catch (\UnauthorizedException $e){
+			$data->code = 401;
+			$data->errors = $e->data();
+		}catch (\PDOException $e){
+			$data->code = 500;
+			$data->errors = "database.error";
+			print_r($e->getMessage());
+		}catch (\Exception $e){
+			if (true){ // debugging
+				// let the error system handle it
+				throw $e;
+			}else{
+				$data->code = 500;
+				$data->errors = $e->getMessage();
+			}
+		}
+
+		// -------
+
+		$data = $this->call($uri, $request_method, $data, false);
+		$this->response->status($data->code);
+		//$data = array_merge($data, $response->getMetadata());
+		$this->response->header('Content-Type', 'application/json');
+		$this->response->body(json_encode((array)$data));
+		$this->response->send();
 	}
 
 }

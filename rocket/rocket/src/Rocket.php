@@ -24,7 +24,7 @@ class Rocket{
 		if (isset(static::$instances[$id])){
 			return static::$instances[$id];
 		}
-		throw new \Exception('Could not find instance of '.$id);
+		return null;
 	}
 
 	public static function call($callable, &$p0 = null, &$p1 = null, &$p2 = null, &$p3 = null, &$p4 = null, &$p5 = null, &$p6 = null){
@@ -41,6 +41,11 @@ class Rocket{
 		//$callable = array_shift($args);
 
 		if (is_array($callable)){
+			if (!class_exists($callable[0])){
+				if (isset(static::$instances[$callable[0]])){
+					$callable[0] = static::$instances[$callable[0]];
+				}
+			}
 			$r = new \ReflectionMethod($callable[0], $callable[1]);
 		}else if (is_string($callable)){
 			$f = new \ReflectionFunction($callable);
@@ -49,7 +54,15 @@ class Rocket{
 		$params = $r->getParameters();
 		$offset = count($args);
 		for ($i = $offset; $i < count($params); $i++){
-			$args[] = static::get($params[$i]->getName());
+			$arg = static::get($params[$i]->getName());
+			if ($arg === null){
+				if ($params[$i]->isOptional()) {
+					$arg = $params[$i]->getDefaultValue();
+				}else{
+					throw new \Exception('Could not find value or instance to inject at $'.$params[$i]->getName());
+				}
+			}
+			$args[] = $arg;
 		}
 
 		return call_user_func_array($callable, $args);

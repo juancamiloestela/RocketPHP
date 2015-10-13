@@ -107,15 +107,51 @@ $mail = Rocket::set('mail', new \Rocket\Mail\System($config['mail']));
 $error = Rocket::set('error', new \Rocket\Error\System($config['error']));
 $translator = Rocket::set('translator', new \Rocket\Translator\System($request, $config['translator']));
 $template = Rocket::set('template', new \Rocket\Template\System($config['template']));
-$api = Rocket::set('api', new \Rocket\Api\System($database, $config['api']));
-$site = Rocket::set('site', new \Rocket\Site\System($database, $config['site']));
+$api = Rocket::set('api', new \Rocket\Api\System($database, $response, $config['api']));
+$site = Rocket::set('site', new \Rocket\Site\System($template, $response, $config['site']));
 $user = Rocket::set('user', new \Rocket\User\System($database, $request, $config['user']));
 
 // user system -> identification system?
 //echo '<pre>';print_r($user);
 
 
-$data = array();
+echo $site->launch($request->uri(), $request->method(), $request->data());
+
+
+
+/*$data = array();
+try{
+	$body = 
+	$response->status(200);
+	$response->body($body);
+	$response->send();
+}catch (NotFoundException $e){
+	$data['code'] = 404;
+	$data['errors'] = "not.found";
+}catch (InvalidInputDataException $e){
+	$data['code'] = 400;
+	$data['errors'] = $e->errors();
+}catch (UnauthorizedException $e){
+	$data['code'] = 401;
+	$data['errors'] = $e->data();
+}catch (PDOException $e){
+	$data['code'] = 500;
+	$data['errors'] = "database.error";
+	print_r($e->getMessage());
+}catch (Exception $e){
+	if (true){ // debugging
+		// let the error system handle it
+		throw $e;
+	}else{
+		$data['code'] = 500;
+		$data['errors'] = $e->getMessage();
+	}
+}*/
+
+
+
+
+/*$data = array();
 try{
 	$data['data'] = $api->launch($request->uri(), $request->method(), $request->data());
 	$data['code'] = 200;
@@ -161,4 +197,4 @@ $response->status($data['code']);
 $data = array_merge($data, $response->getMetadata());
 $response->header('Content-Type', 'application/json');
 $response->body(json_encode($data));
-$response->send();
+$response->send();*/

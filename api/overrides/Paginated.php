@@ -3,10 +3,7 @@
 class Paginated{
 
 	static function on_spec(&$spec){
-		$spec->properties = array(
-			"created" => array("type" => "datetime"),
-			"updated" => array("type" => "datetime")
-		);
+
 	}
 
 	static function on_input(&$data, $mail){
