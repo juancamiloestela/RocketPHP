@@ -68,6 +68,14 @@ class System
 			include $filename;
 			return;
 		}
+
+		if (stripos($file, 'resources') !== false){
+			$filename = $this->config['core_path'] . $file . '.php';
+			if (file_exists($filename)){
+				include $filename;
+				return;
+			}
+		}
 	}
 
 	private function evaluateContexts()
@@ -140,7 +148,7 @@ class System
 
 				$context = $this->getCurrentContext();
 
-				include $this->config['core_path'] . 'resources' . DIRECTORY_SEPARATOR . $controller['class'] . '.php';
+//include $this->config['core_path'] . 'resources' . DIRECTORY_SEPARATOR . $controller['class'] . '.php';
 				$controller['class'] = 'Resources\\'.$controller['class'];
 				$instance = new $controller['class']($this->db);
 				$method = $request_method . $controller['method'] . '_when_' . $context; // + context & method signature
@@ -224,7 +232,7 @@ class System
 
 		// -------
 
-		$data = $this->call($uri, $request_method, $data, false);
+		//$data = $this->call($uri, $request_method, $data, false);
 		$this->response->status($data->code);
 		//$data = array_merge($data, $response->getMetadata());
 		$this->response->header('Content-Type', 'application/json');

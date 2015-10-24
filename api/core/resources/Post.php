@@ -100,7 +100,7 @@ class Post extends \Rocket\Api\Resource{
 	}
 
 	function GET_posts_when_public($data) {
-echo '<pre>';print_r($data);die();		$errors = array();
+		$errors = array();
 
 		\Rocket::call(array("ResponseTime", "on_start"), $data);
 		if (count($errors)) {
@@ -120,7 +120,7 @@ echo '<pre>';print_r($data);die();		$errors = array();
 	}
 
 	function POST_posts_when_public($data) {
-echo '<pre>';print_r($data);die();		$errors = array();
+		$errors = array();
 
 		\Rocket::call(array("ResponseTime", "on_start"), $data);
 		if (count($errors)) {
@@ -128,7 +128,7 @@ echo '<pre>';print_r($data);die();		$errors = array();
 		}
 
 		\Rocket::call(array("TimeTracked", "on_input"), $data);
-		$fields = array_intersect($this->fields, array_keys($data));
+		$fields = array_intersect($this->fields, array_keys((array)$data));
 		$query = "INSERT INTO Post (".implode(',', $fields).") VALUES (:".implode(', :', $fields).")";
 		$statement = $this->db->prepare($query);
 		$statement->execute( $this->getDataForQuery($query, $data) );
@@ -142,7 +142,7 @@ echo '<pre>';print_r($data);die();		$errors = array();
 	}
 
 	function GET_posts_id_when_public($data, $id) {
-echo '<pre>';print_r($data);die();		$errors = array();
+		$errors = array();
 
 		$data->id = $id;
 
@@ -164,7 +164,7 @@ echo '<pre>';print_r($data);die();		$errors = array();
 	}
 
 	function PUT_posts_id_when_public($data, $id) {
-echo '<pre>';print_r($data);die();		$errors = array();
+		$errors = array();
 
 		$data->id = $id;
 
@@ -174,7 +174,7 @@ echo '<pre>';print_r($data);die();		$errors = array();
 		}
 
 		\Rocket::call(array("TimeTracked", "on_input"), $data);
-		$fields = array_intersect($this->fields, array_keys($data));
+		$fields = array_intersect($this->fields, array_keys((array)$data));
 		$pairs = array();
 		foreach ($fields as $field){
 			$pairs[] = $field . " = :" . $field;
@@ -194,7 +194,7 @@ echo '<pre>';print_r($data);die();		$errors = array();
 	}
 
 	function GET_posts_id_blog_when_public($data, $id) {
-echo '<pre>';print_r($data);die();		$errors = array();
+		$errors = array();
 
 		$data->id = $id;
 
@@ -216,7 +216,7 @@ echo '<pre>';print_r($data);die();		$errors = array();
 	}
 
 	function GET_posts_id_tags_when_public($data, $id) {
-echo '<pre>';print_r($data);die();		$errors = array();
+		$errors = array();
 
 		$data->id = $id;
 
@@ -232,7 +232,7 @@ echo '<pre>';print_r($data);die();		$errors = array();
 	}
 
 	function GET_posts_tagged_tag_when_public($data, $tag) {
-echo '<pre>';print_r($data);die();		$errors = array();
+		$errors = array();
 
 		$data->tag = $tag;
 

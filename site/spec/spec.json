@@ -18,21 +18,26 @@
 					"template": "blogs.php"
 				},
 				"POST": {
-					"template": "blogs.php"
+					"actions": {
+						"save": "api.POST('/blogs', $data)"
+					},
+					"redirect": "/blogs"
 				}
 			}
 		},
 		"/blogs/{id}": {
 			"public": {
 				"GET": {
-					"expects": ["name"],
 					"data": {
 						"blog": "api.GET('/blogs/{id}', $data)"
 					},
 					"template": "blog.php"
 				},
 				"POST": {
-					"template": "blogs.php"
+					"actions": {
+						
+					},
+					"redirect": "/blogs"
 				}
 			}
 		}

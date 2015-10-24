@@ -141,7 +141,7 @@ class Generator{
 						$this->routes[$routePattern] = "array(\"class\" => \"$pageName\", \"method\" => \"" . str_replace(array('/', '-'), '_', $routeName) . "\", \"args\" => array(\"".implode('", "', $argNames)."\"))";
 
 						//echo "\t\t" . "\$data = array();" . PHP_EOL;
-						echo "\t\t" . "\$errors = array();" . PHP_EOL . PHP_EOL;
+						echo "\t\t" . "\$errors = \$this->errors;" . PHP_EOL . PHP_EOL;
 
 						$echoed = false;
 						foreach ($args as $argName){
@@ -237,17 +237,20 @@ class Generator{
 								echo "\t\t" . "\$data = \Rocket::call(array(\"$on_action[0]\", \"$on_action[1]\"), \$data);" . PHP_EOL;
 							}else{
 								if ($methodName == "GET"){
+									if (!isset($method->template)){
+										throw new \Exception('Site page must have a template specified');
+									}
 									if (isset($method->data)){
 					//echo "\t\t" . "echo '<pre>';print_r(\$data);";
 										foreach ($method->data as $varName => $dataSource){
 											$dataSource = explode('.', $dataSource);
 											preg_match('/\([^\)]*\)/i', $dataSource[1], $matches);
 
-											if (count($matches)){
+											//if (count($matches)){
 												$dataSource[1] = str_replace($matches[0], '', $dataSource[1]);
 
 												$dataSourceArgs = explode(',', trim($matches[0], '()'));
-
+												$dataSourceArgValues = array();
 												foreach ($dataSourceArgs as $dataSourceArgIndex => $dataSourceArgValue){
 													$dataSourceArgValue = str_replace("'", '"', trim($dataSourceArgValue));
 													if (preg_match_all('/\{([^\}]+)\}/', $dataSourceArgValue, $matches, PREG_SET_ORDER)){
@@ -256,17 +259,53 @@ class Generator{
 															$dataSourceArgValue = str_replace($match[0], '$data->'.str_replace('.', '->', $match[1]), $dataSourceArgValue);
 														}
 													}
-													echo "\t\t" . "\$ref_$dataSourceArgIndex = $dataSourceArgValue;" . PHP_EOL;
+													$dataSourceArgValues[] = $dataSourceArgValue;
+													//echo "\t\t" . "\$ref_$dataSourceArgIndex = $dataSourceArgValue;" . PHP_EOL;
 												}
-												echo "\t\t" . "\$data->$varName = \Rocket::call(array(\"$dataSource[0]\", \"$dataSource[1]\"), \$ref_".implode(', $ref_', array_keys($dataSourceArgs)).");" . PHP_EOL;
-											}else{
-												echo "\t\t" . "\$data->$varName = \Rocket::call(array(\"$dataSource[0]\", \"$dataSource[1]\"));" . PHP_EOL;
-											}
+												echo "\t\t" . "\$args = array(".implode(', ', $dataSourceArgValues).");" . PHP_EOL;
+												echo "\t\t" . "\$data->$varName = \Rocket::callArray(array(\"$dataSource[0]\", \"$dataSource[1]\"), \$args);" . PHP_EOL;
+												//echo "\t\t" . "\$data->$varName = \Rocket::call(array(\"$dataSource[0]\", \"$dataSource[1]\"), \$ref_".implode(', $ref_', array_keys($dataSourceArgs)).");" . PHP_EOL;
+											//}else{
+											//	echo "\t\t" . "\$data->$varName = \Rocket::call(array(\"$dataSource[0]\", \"$dataSource[1]\"));" . PHP_EOL;
+											//}
 
 										}
 									}
 								}else if ($methodName == "POST"){
-									
+									if ($method->actions && count($method->actions)){
+										echo "\t\t" . "try{" . PHP_EOL;
+										foreach ($method->actions as $varName => $action){
+											$action = explode('.', $action);
+											preg_match('/\([^\)]*\)/i', $action[1], $matches);
+
+											//if (count($matches)){
+												$action[1] = str_replace($matches[0], '', $action[1]);
+
+												$actionArgs = explode(',', trim($matches[0], '()'));
+												$actionArgValues = array();
+
+												foreach ($actionArgs as $actionArgIndex => $actionArgValue){
+													$actionArgValue = str_replace("'", '"', trim($actionArgValue));
+													if (preg_match_all('/\{([^\}]+)\}/', $actionArgValue, $matches, PREG_SET_ORDER)){
+														foreach ($matches as $match){
+															//print_r($match);
+															$actionArgValue = str_replace($match[0], '$data->'.str_replace('.', '->', $match[1]), $actionArgValue);
+														}
+													}
+													$actionArgValues[] = $actionArgValue;
+												}
+												//echo "\t\t\t" . "\$data->$varName = \Rocket::call(array(\"$action[0]\", \"$action[1]\"), \$ref_".implode(', $ref_', array_keys($actionArgs)).");" . PHP_EOL;
+												echo "\t\t\t" . "\$args = array(".implode(', ', $actionArgValues).");" . PHP_EOL;
+												echo "\t\t\t" . "\$data->$varName = \Rocket::callArray(array(\"$action[0]\", \"$action[1]\"), \$args);" . PHP_EOL;
+											//}else{
+											//	echo "\t\t\t" . "\$data->$varName = \Rocket::call(array(\"$action[0]\", \"$action[1]\"));" . PHP_EOL;
+											//}
+										}
+										echo "\t\t" . "}catch (\InvalidInputDataException \$e){" . PHP_EOL;
+										echo "\t\t\t" . "\$this->errors = \$e->errors();" . PHP_EOL;
+										echo "\t\t\t" . "return \$this->system->launch('$route', 'GET', \$data);" . PHP_EOL;
+										echo "\t\t" . "}" . PHP_EOL;
+									}
 								}else if ($methodName == "PUT"){
 									
 								}else if ($methodName == "DELETE"){
@@ -286,11 +325,12 @@ class Generator{
 								echo "\t\t" . "\Rocket::call(array(\"$on_data[0]\", \"$on_data[1]\"), \$data);" . PHP_EOL;
 							}
 
-							if (!isset($method->template)){
-								throw new \Exception('Site page must have a template specified');
-							}
-
+							if ($methodName == "GET"){
 							echo "\t\t" . "return \$this->template->render('$method->template', \$data);" . PHP_EOL;
+							}else{
+							echo "\t\t" . "//header('Location: $method->redirect');" . PHP_EOL;
+							echo "\t\t" . "die('redirect');" . PHP_EOL;
+							}
 						}
 						echo "\t}" . PHP_EOL . PHP_EOL;
 					}

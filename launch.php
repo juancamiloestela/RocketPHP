@@ -18,6 +18,7 @@
  * - multi-tenant trait
  * - clean up request and response classes
  * * cascading hook logic, apply a trait at api/resource/endpoint/context/request_method level
+ * - scope traits to system
  *
  * Roadmap
  * - tests
@@ -115,7 +116,7 @@ $user = Rocket::set('user', new \Rocket\User\System($database, $request, $config
 //echo '<pre>';print_r($user);
 
 
-echo $site->launch($request->uri(), $request->method(), $request->data());
+//echo $site->launch($request->uri(), $request->method(), $request->data());
 
 
 

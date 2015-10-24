@@ -45,7 +45,7 @@ class Tag extends \Rocket\Api\Resource{
 	}
 
 	function GET_tags_when_public($data) {
-echo '<pre>';print_r($data);die();		$errors = array();
+		$errors = array();
 
 		\Rocket::call(array("ResponseTime", "on_start"), $data);
 		if (count($errors)) {
@@ -64,7 +64,7 @@ echo '<pre>';print_r($data);die();		$errors = array();
 	}
 
 	function GET_tags_id_when_public($data, $id) {
-echo '<pre>';print_r($data);die();		$errors = array();
+		$errors = array();
 
 		$data->id = $id;
 
@@ -85,7 +85,7 @@ echo '<pre>';print_r($data);die();		$errors = array();
 	}
 
 	function GET_tags_id_posts_when_public($data, $id) {
-echo '<pre>';print_r($data);die();		$errors = array();
+		$errors = array();
 
 		$data->id = $id;
 
@@ -100,7 +100,7 @@ echo '<pre>';print_r($data);die();		$errors = array();
 	}
 
 	function GET_tagged_tag_when_public($data, $tag) {
-echo '<pre>';print_r($data);die();		$errors = array();
+		$errors = array();
 
 		$data->tag = $tag;
 
@@ -122,7 +122,7 @@ echo '<pre>';print_r($data);die();		$errors = array();
 	}
 
 	function GET_tagged_tag_posts_when_public($data, $tag) {
-echo '<pre>';print_r($data);die();		$errors = array();
+		$errors = array();
 
 		$data->tag = $tag;
 

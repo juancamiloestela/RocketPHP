@@ -325,7 +325,7 @@ class Generator{
 
 						echo "\t". "function $methodName" . str_replace(array('/', '-'), '_', $routeName) . "_when_$contextName(" . implode(', ', $args) . ") {" . PHP_EOL;
 						$this->routes[$routePattern] = "array(\"class\" => \"$resourceName\", \"method\" => \"" . str_replace(array('/', '-'), '_', $routeName) . "\", \"args\" => array(\"".implode('", "', $argNames)."\"))";
-echo "echo '<pre>';print_r(\$data);die();";
+
 						//echo "\t\t" . "\$data = array();" . PHP_EOL;
 						echo "\t\t" . "\$errors = array();" . PHP_EOL . PHP_EOL;
 
@@ -548,7 +548,7 @@ echo "echo '<pre>';print_r(\$data);die();";
 									if (isset($method->sql)){
 										echo "\t\t" . "\$query = \"{$method->sql}\";" . PHP_EOL;
 									}else{
-										echo "\t\t" . "\$fields = array_intersect(\$this->fields, array_keys(\$data));" . PHP_EOL;
+										echo "\t\t" . "\$fields = array_intersect(\$this->fields, array_keys((array)\$data));" . PHP_EOL;
 										echo "\t\t" . "\$query = \"INSERT INTO $resourceName (\".implode(',', \$fields).\") VALUES (:\".implode(', :', \$fields).\")\";" . PHP_EOL;
 									}
 									if (isset($method->traits)){
@@ -584,7 +584,7 @@ echo "echo '<pre>';print_r(\$data);die();";
 									if (isset($method->sql)){
 										echo "\t\t" . "\$query = \"{$method->sql}\";" . PHP_EOL;
 									}else{
-										echo "\t\t" . "\$fields = array_intersect(\$this->fields, array_keys(\$data));" . PHP_EOL;
+										echo "\t\t" . "\$fields = array_intersect(\$this->fields, array_keys((array)\$data));" . PHP_EOL;
 										echo "\t\t" . "\$pairs = array();" . PHP_EOL;
 										echo "\t\t" . "foreach (\$fields as \$field){" . PHP_EOL;
 										echo "\t\t\t" . "\$pairs[] = \$field . \" = :\" . \$field;" . PHP_EOL;

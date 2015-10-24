@@ -177,7 +177,7 @@ function renderArrayData($label, $array){
 
         <div class="stack-trace">
 			<h3>Stack Trace</h3>
-			<!--pre><?php print_r($error['trace']); ?></pre-->
+
 			<ol reversed>
             <?php foreach ($error['trace'] as $i => $trace): ?>
 				<?php if (isset($trace['class']) && $trace['class'] == 'Rocket\Error\System'){
@@ -199,7 +199,11 @@ function renderArrayData($label, $array){
 						?>
 					</div>
                     <div class="args">
-                        <pre><?php print_r($trace['args']); ?></pre>
+                        <pre><?php
+                        	foreach ($trace['args'] as $key => $value){
+                        		
+                        	}
+                        ?></pre>
                     </div>
                 </li>
             <?php endforeach; ?>

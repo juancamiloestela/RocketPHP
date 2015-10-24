@@ -138,6 +138,7 @@
 				},
 				"description": {
 					"type": "string",
+					"min_length": 1,
 					"max_length": 400
 				},
 				"posts": {
@@ -164,6 +165,7 @@
 							"returns": [{}]
 						},
 						"POST": {
+							"expects": ["name", "description"],
 							"returns": {}
 						}
 					}

@@ -8,24 +8,31 @@ namespace Pages;
 class Blogs extends \Rocket\Site\Page{
 
 	function GET_when_public($data) {
-		$errors = array();
+		$errors = $this->errors;
 
 		\Rocket::call(array("ResponseTime", "on_start"), $data);
 		$data->errors = $errors;
-		$ref_0 = "/blogs";
-		$ref_1 = $data;
-		$data->blogs = \Rocket::call(array("api", "GET"), $ref_0, $ref_1);
+		$args = array("/blogs", $data);
+		$data->blogs = \Rocket::callArray(array("api", "GET"), $args);
 		\Rocket::call(array("ResponseTime", "on_data"), $data);
 		return $this->template->render('blogs.php', $data);
 	}
 
 	function POST_when_public($data) {
-		$errors = array();
+		$errors = $this->errors;
 
 		\Rocket::call(array("ResponseTime", "on_start"), $data);
 		$data->errors = $errors;
+		try{
+			$args = array("/blogs", $data);
+			$data->save = \Rocket::callArray(array("api", "POST"), $args);
+		}catch (\InvalidInputDataException $e){
+			$this->errors = $e->errors();
+			return $this->system->launch('/blogs', 'GET', $data);
+		}
 		\Rocket::call(array("ResponseTime", "on_data"), $data);
-		return $this->template->render('blogs.php', $data);
+		//header('Location: /blogs');
+		die('redirect');
 	}
 
 }

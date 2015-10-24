@@ -12,9 +12,9 @@ class TimeTracked{
 		if ($request->method() == 'GET'){
 			// do nothing
 		}else if ($request->method() == 'POST'){
-			$data['created'] = $datetime;
+			$data->created = $datetime;
 		}else{
-			$data['updated'] = $datetime;
+			$data->updated = $datetime;
 		}
 	}
 }

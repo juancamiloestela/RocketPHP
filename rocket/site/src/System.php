@@ -8,6 +8,7 @@ class System
 
 	public $template;
 	public $response;
+	protected $instance;
 	public $config = array();
 	protected $defaults = array(
 		'payload' => 'site/',
@@ -66,6 +67,14 @@ class System
 			include $filename;
 			return;
 		}
+
+		if (stripos($file, 'pages') !== false){
+			$filename = $this->config['core_path'] . $file . '.php';
+			if (file_exists($filename)){
+				include $filename;
+				return;
+			}
+		}
 	}
 
 	private function evaluateContexts()
@@ -110,7 +119,7 @@ class System
 		return false;
 	}
 
-	public function launch($uri, $request_method, $data = array(), $internal = false)
+	public function launch($uri, $request_method, $data = array())
 	{
 
 		foreach ($this->routes as $route => $controller){
@@ -123,14 +132,15 @@ class System
 
 				$context = $this->getCurrentContext();
 
-				include $this->config['core_path'] . 'pages' . DIRECTORY_SEPARATOR . $controller['class'] . '.php';
 				$controller['class'] = 'Pages\\'.$controller['class'];
-				$instance = new $controller['class']($this->template);
+				if (get_class($this->instance) != $controller['class']){
+					$this->instance = new $controller['class']($this, $this->template);
+				}
 				$method = $request_method . '_when_' . $context;
 
-				if (method_exists($instance, $method)){
+				if (method_exists($this->instance, $method)){
 					try{
-						$body = call_user_func_array(array($instance, $method), $args);
+						$body = call_user_func_array(array($this->instance, $method), $args);
 						$status = 200;
 						$this->response->body($body);
 					}catch (\NotFoundException $e){
